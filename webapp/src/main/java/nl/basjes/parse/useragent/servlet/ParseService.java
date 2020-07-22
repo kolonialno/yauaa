@@ -28,6 +28,8 @@ import nl.basjes.parse.useragent.UserAgent;
 import nl.basjes.parse.useragent.UserAgentAnalyzer;
 import nl.basjes.parse.useragent.Version;
 import nl.basjes.parse.useragent.debug.UserAgentAnalyzerTester;
+import nl.basjes.weddini.throttling.Throttling;
+import nl.basjes.weddini.throttling.ThrottlingException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -48,11 +50,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -60,15 +62,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static nl.basjes.parse.useragent.utils.YauaaVersion.getVersion;
 import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 import static org.apache.commons.text.StringEscapeUtils.escapeJson;
 import static org.apache.commons.text.StringEscapeUtils.escapeXml10;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.PAYMENT_REQUIRED;
 import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
+import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
 @SuppressWarnings("deprecation") // The description field may be deprecated but in SpringFox it is still used.
@@ -259,9 +264,7 @@ public class ParseService {
         extends ResponseEntityExceptionHandler {
 
         @ExceptionHandler({ YauaaIsBusyStarting.class })
-        public ResponseEntity<Object> handleYauaaIsStarting(
-            Exception ex,
-            @SuppressWarnings("unused") WebRequest request) {
+        public ResponseEntity<Object> handleYauaaIsStarting(Exception ex) {
             final HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Retry-After", "5"); // Retry after 5 seconds.
 
@@ -320,12 +323,55 @@ public class ParseService {
 
         @ExceptionHandler({YauaaTestsFailed.class})
         public ResponseEntity<Object> handleYauaaTestsInError(
-            Exception ex,
-            @SuppressWarnings("unused") WebRequest request) {
+            Exception ex) {
             final HttpHeaders httpHeaders = new HttpHeaders();
             return new ResponseEntity<>(ex.getMessage(), httpHeaders, INTERNAL_SERVER_ERROR);
         }
 
+        @ExceptionHandler({ThrottlingException.class})
+        public ResponseEntity<Object> tooFast(HttpServletRequest request) {
+            final HttpHeaders httpHeaders = new HttpHeaders();
+
+            String requestedContentType = TEXT_HTML_VALUE;
+
+            if (request != null) {
+                String contentType = request.getContentType();
+                if (contentType != null && !contentType.isEmpty()) {
+                    requestedContentType = contentType;
+                }
+            }
+
+            String baseErrorMessage =
+                "Wow please slow down. " +
+                "This is just a demonstration servlet. " +
+                "If you want to run a production grade version it can't be for free. " +
+                "Sorry about that.";
+
+            String message;
+            switch (requestedContentType) {
+                case TEXT_XYAML_VALUE:
+                    message = "status: \"Failed\"\nerrorMessage: |\n" + baseErrorMessage + "\n";
+                    break;
+                case TEXT_PLAIN_VALUE:
+                    message = "FAILED: \n" + baseErrorMessage;
+                    break;
+                case APPLICATION_JSON_VALUE:
+                    message = "{ \"status\": \"Failed\", \"errorMessage\": " + escapeJson(baseErrorMessage) + " }";
+                    break;
+                case APPLICATION_XML_VALUE:
+                    message = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><status>Failed</status><errorMessage>" + escapeXml10(baseErrorMessage) + "</errorMessage>";
+                    break;
+                case TEXT_HTML_VALUE:
+                default:
+                    message = "<!DOCTYPE HTML>" +
+                        "<html>" +
+                        "<head><meta charset=\"utf-8\"><title>Please slow down</title></head>" +
+                        "<body><p>" + baseErrorMessage.replaceAll("\\. ", ".</p><p>") + "</p></body>";
+                    break;
+            }
+            httpHeaders.setContentType(MediaType.valueOf(requestedContentType));
+            return new ResponseEntity<>(message, httpHeaders, PAYMENT_REQUIRED);
+        }
     }
 
     private static final long MEGABYTE = 1024L * 1024L;
@@ -351,8 +397,9 @@ public class ParseService {
 
     @GetMapping(
         value = "/",
-        produces = MediaType.TEXT_HTML_VALUE
+        produces = TEXT_HTML_VALUE
     )
+    @Throttling // (limit = 1, timeUnit = TimeUnit.SECONDS)
     public String getHtml(@RequestHeader("User-Agent") String userAgentString) {
         return doHTML(userAgentString);
     }
@@ -360,8 +407,9 @@ public class ParseService {
     @PostMapping(
         value = "/",
         consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-        produces = MediaType.TEXT_HTML_VALUE
+        produces = TEXT_HTML_VALUE
     )
+    @Throttling(limit = 12, timeUnit = TimeUnit.MINUTES)
     public String getHtmlPOST(@ModelAttribute("useragent") String userAgent) {
         return doHTML(userAgent);
     }
@@ -389,6 +437,7 @@ public class ParseService {
         value = { API_BASE_PATH + "/analyze", API_BASE_PATH + "/analyze/yaml" },
         produces = { TEXT_XYAML_VALUE, TEXT_PLAIN_VALUE }
     )
+    @Throttling(limit = 12, timeUnit = TimeUnit.MINUTES)
     public String getYamlGET(
         @ApiParam(
             value = "The standard browser request header User-Agent is used as the input that is to be analyzed.",
@@ -422,6 +471,7 @@ public class ParseService {
             })
         )
     })
+    @Throttling(limit = 12, timeUnit = TimeUnit.MINUTES)
     public String getYamlPOST(
         @ApiParam(
             name ="Request body",
@@ -459,6 +509,7 @@ public class ParseService {
         value = { API_BASE_PATH + "/analyze", API_BASE_PATH + "/analyze/json" },
         produces = APPLICATION_JSON_VALUE
     )
+    @Throttling(limit = 12, timeUnit = TimeUnit.MINUTES)
     public String getJSonGET(
         @ApiParam(
             value = "The standard browser request header User-Agent is used as the input that is to be analyzed.",
@@ -492,6 +543,7 @@ public class ParseService {
             })
         )
     })
+    @Throttling(limit = 12, timeUnit = TimeUnit.MINUTES)
     public String getJSonPOST(
         @ApiParam(
             name ="Request body",
@@ -528,6 +580,7 @@ public class ParseService {
         value = { API_BASE_PATH + "/analyze", API_BASE_PATH + "/analyze/xml" },
         produces = APPLICATION_XML_VALUE
     )
+    @Throttling(limit = 12, timeUnit = TimeUnit.MINUTES)
     public String getXMLGET(
         @ApiParam(
             value = "The standard browser request header User-Agent is used as the input that is to be analyzed.",
@@ -549,6 +602,7 @@ public class ParseService {
         consumes = TEXT_PLAIN_VALUE,
         produces = APPLICATION_XML_VALUE
     )
+    @Throttling(limit = 12, timeUnit = TimeUnit.MINUTES)
     public String getXMLPOST(
         @ApiParam(
             name ="Request body",
@@ -586,6 +640,7 @@ public class ParseService {
         value = API_BASE_PATH + "/preheat",
         produces = APPLICATION_JSON_VALUE
     )
+    @Throttling(limit = 2, timeUnit = TimeUnit.MINUTES)
     public String getPreHeat() {
         ensureStartedForApis(OutputType.JSON);
         final int cacheSize = userAgentAnalyzer.getCacheSize();
@@ -633,6 +688,7 @@ public class ParseService {
         value = API_BASE_PATH + "/runtests",
         produces = TEXT_PLAIN_VALUE
     )
+    @Throttling(limit = 2, timeUnit = TimeUnit.MINUTES)
     public String getRunTests() {
         UserAgentAnalyzerTester tester = UserAgentAnalyzerTester.newBuilder()
             .hideMatcherLoadStats()
