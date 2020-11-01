@@ -53,6 +53,12 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -61,6 +67,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static nl.basjes.parse.useragent.Version.PROJECT_VERSION;
 import static nl.basjes.parse.useragent.utils.YauaaVersion.getVersion;
 import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 import static org.apache.commons.text.StringEscapeUtils.escapeJson;
@@ -175,12 +182,13 @@ public class ParseService {
         "      AgentNameVersion                      : 'Chrome 53.0.2785.124'\n" +
         "      AgentNameVersionMajor                 : 'Chrome 53'\n";
 
-    private enum OutputType {
+    enum OutputType {
         YAML,
         HTML,
         JSON,
         XML,
-        TXT
+        TXT,
+        PNG
     }
 
     private static void setInstance(ParseService newInstance) {
@@ -287,6 +295,10 @@ public class ParseService {
                         break;
                     case XML:
                         message = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><status>Starting</status><timeInMs>" + timeSinceStart + "</timeInMs>";
+                        break;
+                    case PNG:
+                        message = "Yauaa has been starting up for " + timeSinceStart + " seconds now.  TODO: MAKE IMAGE";
+                        //  TODO: MAKE IMAGE
                         break;
                     case HTML:
                     default:
@@ -560,6 +572,66 @@ public class ParseService {
         @RequestBody String userAgentString
     ) {
         return doXML(userAgentString);
+    }
+
+    // =============== Image ==================
+
+    @GetMapping(
+        value = "/yauaa.png",
+//        produces = MediaType.TEXT_HTML_VALUE
+        produces = MediaType.IMAGE_PNG_VALUE
+    )
+    public byte[] getPng(@RequestHeader("User-Agent") String userAgentString) throws IOException {
+        ensureStartedForApis(OutputType.PNG);
+        StringBuilder sb = new StringBuilder(4096);
+        sb.append("<!DOCTYPE html>");
+        sb.append("<html><head profile=\"http://www.w3.org/2005/10/profile\">");
+        sb.append("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>");
+        sb.append("<meta name=viewport content=\"width=device-width, initial-scale=1\">");
+        sb.append("<meta name=\"theme-color\" content=\"dodgerblue\" />");
+        sb.append("<link rel=\"stylesheet\" href=\"style.css\">");
+        sb.append("<title>Analyzing the useragent</title>");
+        sb.append("</head>");
+        sb.append("<body>");
+        sb.append("<div class=\"pngBackground\"></div>");
+        sb.append("<div class=\"pngText\">");
+        sb.append("<h1 class=\"pngTitle\">Yauaa</h1>");
+        sb.append("<p class=\"pngVersion\">").append(PROJECT_VERSION).append("</p>");
+//        sb.append("<p class=\"copyright\">").append(Version.COPYRIGHT.replace("Copyright ", "")).append("</p>");
+
+        UserAgent userAgent = userAgentAnalyzer.parse(userAgentString);
+
+        sb.append("<p class=\"pngResult\">")
+            .append("A <b>").append(escapeHtml4(userAgent.getValue("DeviceClass")))
+            .append("</b> running <b>").append(escapeHtml4(userAgent.getValue("AgentNameVersionMajor")))
+            .append("</b> on <b>").append(escapeHtml4(userAgent.getValue("OperatingSystemNameVersion")))
+            .append("</b></p>");
+        sb.append("</div>");
+
+        sb
+            .append("</body>")
+            .append("</html>");
+
+//        return sb.toString().getBytes(StandardCharsets.UTF_8);
+
+//        JEditorPane pane = new JEditorPane(MediaType.TEXT_HTML_VALUE, sb.toString());
+        JEditorPane pane = new JEditorPane(MediaType.TEXT_HTML_VALUE, "<i><u>N</u>iels</i>");
+        pane.setSize(150, 150);
+
+        BufferedImage image = new BufferedImage(
+            pane.getWidth(), pane.getHeight(),
+            BufferedImage.TYPE_INT_RGB);
+
+        // Paint the html to an image
+        Graphics graphics = image.getGraphics();
+        graphics.setColor(Color.YELLOW);
+        pane.print(graphics);
+        graphics.dispose();
+
+        // get the byte array of the image (as jpeg)
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", baos);
+        return baos.toByteArray();
     }
 
     // =============== Specials ===============

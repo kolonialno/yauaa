@@ -52,6 +52,54 @@ body {
     text-align: center;
 }
 
+.pngBackground {
+    position: absolute;
+    background-image: url(excavator.svg);
+
+    /* Add the blur effect */
+    filter: blur(8px);
+    -webkit-filter: blur(8px);
+
+    /* Full height */
+    height: 150px;
+    width:  150px;
+    /*height: 100%;*/
+
+    /* Center and scale the image nicely */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.pngText {
+    position: absolute;
+    text-shadow: 0.05em 0.05em #aaaaaa ;
+    height: 150px;
+    width:  150px;
+    text-align: center;
+    vertical-align: center;
+}
+
+
+.pngTitle {
+    font-weight: bold;
+    text-align: center;
+    vertical-align: center;
+    text-shadow: 0.05em 0.05em #aaaaaa ;
+    margin: 0;
+}
+
+.pngVersion {
+    font-variant: small-caps;
+    text-align: center;
+    font-size: smaller;
+    margin: 0;
+}
+
+.pngResult {
+    color: #00ff00;
+}
+
 .notYetStartedBorder {
     background-image: url("hourglass.svg");
     background-size: 5em 5em;
