@@ -84,7 +84,7 @@ public abstract class MatcherAction implements Serializable {
     private String matchExpression;
     TreeExpressionEvaluator evaluator;
 
-    TreeExpressionEvaluator getEvaluatorForUnitTesting() {
+    public TreeExpressionEvaluator getEvaluatorForUnitTesting() {
         return evaluator;
     }
 

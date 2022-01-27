@@ -33,10 +33,6 @@
 
   <url>https://yauaa.basjes.nl</url>
 
-  <properties>
-    <Automatic-Module-Name>nl.basjes.parse.useragent</Automatic-Module-Name>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.antlr</groupId>
@@ -48,6 +44,12 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-core</artifactId>
       <version>${spring.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-jcl</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -124,12 +126,6 @@
       <optional>true</optional>
     </dependency>
 
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-      <version>3.0.2</version>
-    </dependency>
-
   </dependencies>
 
   <build>
@@ -157,7 +153,6 @@
               <Implementation-Version>${project.version}</Implementation-Version>
               <Implementation-Vendor>Niels Basjes</Implementation-Vendor>
               <Implementation-Vendor-Id>nl.basjes</Implementation-Vendor-Id>
-              <Automatic-Module-Name>${Automatic-Module-Name}</Automatic-Module-Name>
               <url>${project.url}</url>
             </manifestEntries>
           </archive>

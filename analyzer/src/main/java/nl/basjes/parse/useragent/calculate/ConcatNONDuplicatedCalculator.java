@@ -20,7 +20,6 @@ package nl.basjes.parse.useragent.calculate;
 import nl.basjes.parse.useragent.AgentField;
 import nl.basjes.parse.useragent.UserAgent.MutableUserAgent;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -34,9 +33,9 @@ public class ConcatNONDuplicatedCalculator extends FieldCalculator {
     private final String secondName;
 
     public ConcatNONDuplicatedCalculator(
-        @Nonnull String targetName,
-        @Nonnull String firstName,
-        @Nonnull String secondName) {
+        String targetName,
+        String firstName,
+        String secondName) {
         this.targetName = targetName;
         this.firstName = firstName;
         this.secondName = secondName;

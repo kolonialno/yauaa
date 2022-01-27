@@ -33,8 +33,8 @@
   <url>https://yauaa.basjes.nl</url>
 
   <properties>
-    <target.java.version>1.8</target.java.version>
-    <target.java.release>8</target.java.release>
+    <target.java.version>11</target.java.version>
+    <target.java.release>11</target.java.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
     <maven.compiler.source>${target.java.version}</maven.compiler.source>
@@ -497,7 +497,8 @@
             <!-- Ignore 'classfile' to allow leaving Kryo out. -->
             <!-- Ignore 'processing' to avoid "No processor claimed any of these annotations" in several places. -->
             <!-- Ignore 'serial' warnings about not having a serialVersionUID -->
-            <arg>-Xlint:all,-classfile,-processing,-serial</arg>
+            <!-- Ignore 'exports' warnings about "class X in module Y is not indirectly exported using requires transitive" -->
+            <arg>-Xlint:all,-classfile,-processing,-serial,-exports</arg>
             <arg>-Werror</arg>
             <arg>-implicit:class</arg>
           </compilerArgs>

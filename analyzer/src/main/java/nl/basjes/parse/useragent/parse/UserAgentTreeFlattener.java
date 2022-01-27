@@ -116,7 +116,7 @@ public class UserAgentTreeFlattener extends UserAgentBaseListener implements Ser
             this.name = name;
         }
 
-        public String calculatePath(PathType type, boolean fakeChild) {
+        String calculatePath(PathType type, boolean fakeChild) {
             ParseTree node = ctx;
             path = name;
             if (node == null) {

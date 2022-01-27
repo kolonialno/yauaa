@@ -26,8 +26,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.Serializable;
 
 import static nl.basjes.parse.useragent.utils.AntlrUtils.getSourceText;
@@ -58,7 +56,7 @@ public abstract class Step implements Serializable {
         logprefix = sb.toString();
     }
 
-    protected final WalkResult walkNextStep(@Nonnull ParseTree tree, @Nullable String value) {
+    protected final WalkResult walkNextStep(ParseTree tree, String value) {
         if (nextStep == null) {
             String result = value;
             if (value == null) {
@@ -82,7 +80,7 @@ public abstract class Step implements Serializable {
         return result;
     }
 
-    protected final ParseTree up(@Nonnull ParseTree tree) {
+    protected final ParseTree up(ParseTree tree) {
         ParseTree parent = tree.getParent();
 
         // Needed because of the way the ANTLR rules have been defined.
@@ -100,7 +98,7 @@ public abstract class Step implements Serializable {
             || tree instanceof TerminalNode;
     }
 
-    protected String getActualValue(@Nonnull ParseTree tree, @Nullable String value) {
+    protected String getActualValue(ParseTree tree, String value) {
         if (value == null) {
             return getSourceText((ParserRuleContext)tree);
         }
@@ -116,7 +114,7 @@ public abstract class Step implements Serializable {
      *              The null value means to use the implicit 'full' value (i.e. getSourceText(tree) )
      * @return Either null or the actual value that was found.
      */
-    public abstract WalkResult walk(@Nonnull ParseTree tree, @Nullable String value);
+    public abstract WalkResult walk(ParseTree tree, String value);
 
     /**
      * Some steps cannot fail.

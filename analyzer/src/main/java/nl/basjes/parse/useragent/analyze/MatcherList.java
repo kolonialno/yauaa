@@ -22,7 +22,6 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.serializers.FieldSerializer;
 
-import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -106,7 +105,6 @@ public final class MatcherList implements Collection<Matcher>, Serializable {
         return true;
     }
 
-    @Nonnull
     @Override
     public Iterator<Matcher> iterator() {
         return new Iterator<Matcher>() {
@@ -141,7 +139,6 @@ public final class MatcherList implements Collection<Matcher>, Serializable {
     }
 
     // Needed for debugging
-    @Nonnull
     @Override
     public Object[] toArray() {
         return Arrays.copyOf(this.allElements, this.size);
@@ -152,7 +149,7 @@ public final class MatcherList implements Collection<Matcher>, Serializable {
 // ============================================================
 
     @Override
-    public boolean addAll(@Nonnull Collection<? extends Matcher> collection) {
+    public boolean addAll(Collection<? extends Matcher> collection) {
         throw new UnsupportedOperationException();
     }
 
@@ -162,12 +159,12 @@ public final class MatcherList implements Collection<Matcher>, Serializable {
     }
 
     @Override
-    public boolean removeAll(@Nonnull Collection<?> collection) {
+    public boolean removeAll(Collection<?> collection) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean retainAll(@Nonnull Collection<?> collection) {
+    public boolean retainAll(Collection<?> collection) {
         throw new UnsupportedOperationException();
     }
 
@@ -177,12 +174,12 @@ public final class MatcherList implements Collection<Matcher>, Serializable {
     }
 
     @Override
-    public boolean containsAll(@Nonnull Collection<?> collection) {
+    public boolean containsAll(Collection<?> collection) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T> T[] toArray(@Nonnull T[] ts) {
+    public <T> T[] toArray(T[] ts) {
         throw new UnsupportedOperationException();
     }
 }

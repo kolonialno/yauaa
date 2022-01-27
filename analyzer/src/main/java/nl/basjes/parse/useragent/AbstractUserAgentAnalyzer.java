@@ -25,7 +25,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import nl.basjes.parse.useragent.UserAgent.ImmutableUserAgent;
 import nl.basjes.parse.useragent.UserAgent.MutableUserAgent;
 
-import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -121,6 +120,11 @@ public class AbstractUserAgentAnalyzer extends AbstractUserAgentAnalyzerDirect i
         }
     }
 
+    // FIXME: I only want this for testing
+    public Map<String, ImmutableUserAgent> getCache() {
+        return parseCache;
+    }
+
     synchronized void initializeCache() {
         if (cacheSize >= 1) {
             parseCache = cacheInstantiator.instantiateCache(cacheSize);
@@ -153,7 +157,6 @@ public class AbstractUserAgentAnalyzer extends AbstractUserAgentAnalyzerDirect i
         return cacheSize;
     }
 
-    @Nonnull
     @Override
     public ImmutableUserAgent parse(MutableUserAgent userAgent) {
         // Many caching implementations do not allow null keys and/or values

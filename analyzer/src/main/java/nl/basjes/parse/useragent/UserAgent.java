@@ -711,7 +711,8 @@ public interface UserAgent extends Serializable {
             }
         }
 
-        void setImmediateForTesting(String fieldName, MutableAgentField agentField) {
+        // FIXME: Visible for testing
+        public void setImmediateForTesting(String fieldName, MutableAgentField agentField) {
             allFields.put(fieldName, agentField);
         }
 
