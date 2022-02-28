@@ -19,6 +19,9 @@
 open module nl.example.java11tests {
     requires nl.example.java11module;
 
+    // The tests directly use some classes from the main library
+    requires nl.basjes.parse.useragent;
+
     // Needed because we do serialization with this
     requires com.esotericsoftware.kryo;
 

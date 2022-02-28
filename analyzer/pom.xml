@@ -33,6 +33,11 @@
 
   <url>https://yauaa.basjes.nl</url>
 
+  <properties>
+    <shading-relocation-root>nl.basjes.parse.useragent.shaded</shading-relocation-root>
+    <shading-relocation-root-path>nl/basjes/parse/useragent/shaded</shading-relocation-root-path>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.antlr</groupId>
@@ -136,7 +141,7 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-jcl</artifactId>
       <version>${spring.version}</version>
-      <scope>provided</scope>
+<!--      <scope>provided</scope>-->
     </dependency>
 
     <dependency>
@@ -223,15 +228,15 @@
           <relocations>
             <relocation>
               <pattern>org.springframework</pattern>
-              <shadedPattern>nl.basjes.shaded.org.springframework</shadedPattern>
+              <shadedPattern>${shading-relocation-root}.org.springframework</shadedPattern>
             </relocation>
             <relocation>
               <pattern>org.antlr</pattern>
-              <shadedPattern>nl.basjes.shaded.org.antlr</shadedPattern>
+              <shadedPattern>${shading-relocation-root}.org.antlr</shadedPattern>
             </relocation>
             <relocation>
               <pattern>org.yaml.snakeyaml</pattern>
-              <shadedPattern>nl.basjes.shaded.org.yaml.snakeyaml</shadedPattern>
+              <shadedPattern>${shading-relocation-root}.org.yaml.snakeyaml</shadedPattern>
             </relocation>
           </relocations>
         </configuration>
@@ -254,6 +259,34 @@
             </configuration>
           </execution>
 
+        </executions>
+      </plugin>
+
+      <!-- Normally the maven-shade-plugin rightfully REMOVES the module-info.class file because                -->
+      <!-- shading and modules do not mix very well.                                                            -->
+      <!-- In this specific scenario ALL shaded dependencies are also relocated into a project specific package -->
+      <!-- and thus can no longer cause conflicts with other modules.                                           -->
+      <!-- This means we can safely reinsert the module-info.class                                              -->
+      <plugin>
+        <groupId>org.moditect</groupId>
+        <artifactId>moditect-maven-plugin</artifactId>
+        <version>1.0.0.RC2</version>
+        <executions>
+          <execution>
+            <id>reinsert-module-info</id>
+            <phase>package</phase>
+            <goals>
+              <goal>add-module-info</goal>
+            </goals>
+            <configuration>
+              <overwriteExistingFiles>true</overwriteExistingFiles>
+              <module>
+                <moduleInfoFile>
+                  src/main/java/module-info.java
+                </moduleInfoFile>
+              </module>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 
@@ -281,8 +314,8 @@
 
                 String[] libraryWanted = {
                   "nl/basjes/parse/useragent/utils/YauaaVersion.class",
-                  "nl/basjes/shaded/org/antlr/v4/runtime/Parser.class",
-                  "nl/basjes/shaded/org/springframework/core/io/support/PathMatchingResourcePatternResolver.class",
+                  "${shading-relocation-root-path}/org/antlr/v4/runtime/Parser.class",
+                  "${shading-relocation-root-path}/org/springframework/core/io/support/PathMatchingResourcePatternResolver.class",
                 };
 
                 String[] libraryUnwanted = {
@@ -341,6 +374,22 @@
             </goals>
             <configuration>
               <executable>./inject-dependency-reduced-pom-into-jar.sh</executable>
+              <arguments>
+                <argument>${project.groupId}</argument>
+                <argument>${project.artifactId}</argument>
+                <argument>${project.version}</argument>
+              </arguments>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>Inject module-info.class into the final jar file</id>
+            <phase>package</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>./inject-module-info-into-jar.sh</executable>
               <arguments>
                 <argument>${project.groupId}</argument>
                 <argument>${project.artifactId}</argument>
