@@ -60,6 +60,8 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -95,7 +97,7 @@ class TestSteps {
 
     private final Step returnNullStep = new Step() {
         @Override
-        public WalkResult walk(ParseTree tree, String value) {
+        public WalkResult walk(@NotNull ParseTree tree, String value) {
             return null;
         }
     };

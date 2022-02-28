@@ -51,6 +51,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -597,6 +598,7 @@ public abstract class AbstractUserAgentAnalyzerDirect implements Analyzer, Analy
      * @param userAgent The MutableUserAgent instance that is to be parsed and that gets all results
      * @return An ImmutableUserAgent copy of the results that is suitable for further usage and caching.
      */
+    @NotNull
     public ImmutableUserAgent parse(MutableUserAgent userAgent) {
         initializeMatchers();
         String useragentString = userAgent.getUserAgentString();

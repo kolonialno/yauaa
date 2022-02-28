@@ -20,6 +20,8 @@ package nl.basjes.parse.useragent.analyze.treewalker.steps.compare;
 import nl.basjes.parse.useragent.analyze.treewalker.steps.Step;
 import nl.basjes.parse.useragent.analyze.treewalker.steps.WalkList.WalkResult;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.Locale;
@@ -42,7 +44,7 @@ public class StepIsNotInSet extends Step {
     }
 
     @Override
-    public WalkResult walk(ParseTree tree, String value) {
+    public WalkResult walk(@NotNull ParseTree tree, @Nullable String value) {
         String actualValue = getActualValue(tree, value);
 
         if (!list.contains(actualValue.toLowerCase(Locale.ROOT))) {

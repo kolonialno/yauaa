@@ -28,6 +28,8 @@ import nl.basjes.parse.useragent.analyze.treewalker.steps.WalkList.WalkResult;
 import nl.basjes.parse.useragent.analyze.treewalker.steps.walk.stepdown.UserAgentGetChildrenVisitor;
 import nl.basjes.parse.useragent.parser.UserAgentTreeWalkerParser.NumberRangeContext;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
 
@@ -84,7 +86,7 @@ public class StepDown extends Step {
     }
 
     @Override
-    public WalkResult walk(ParseTree tree, String value) {
+    public WalkResult walk(@NotNull ParseTree tree, @Nullable String value) {
         Iterator<? extends ParseTree> children = userAgentGetChildrenVisitor.visit(tree);
         while (children.hasNext()) {
             ParseTree  child       = children.next();

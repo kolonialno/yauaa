@@ -23,6 +23,7 @@ import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.serializers.FieldSerializer;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import org.jetbrains.annotations.NotNull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -137,6 +138,7 @@ public final class MatchesList implements Collection<MatchesList.Match>, Seriali
         size++;
     }
 
+    @NotNull
     @Override
     public Iterator<Match> iterator() {
         return new Iterator<Match>() {
@@ -157,6 +159,7 @@ public final class MatchesList implements Collection<MatchesList.Match>, Seriali
         };
     }
 
+    @NotNull
     @Override
     public Object[] toArray() {
         return Arrays.copyOf(this.allElements, this.size);
@@ -197,7 +200,7 @@ public final class MatchesList implements Collection<MatchesList.Match>, Seriali
     }
 
     @Override
-    public boolean addAll(Collection<? extends Match> collection) {
+    public boolean addAll(@NotNull Collection<? extends Match> collection) {
         throw new UnsupportedOperationException();
     }
 
@@ -207,12 +210,12 @@ public final class MatchesList implements Collection<MatchesList.Match>, Seriali
     }
 
     @Override
-    public boolean removeAll(Collection<?> collection) {
+    public boolean removeAll(@NotNull Collection<?> collection) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean retainAll(Collection<?> collection) {
+    public boolean retainAll(@NotNull Collection<?> collection) {
         throw new UnsupportedOperationException();
     }
 
@@ -222,12 +225,12 @@ public final class MatchesList implements Collection<MatchesList.Match>, Seriali
     }
 
     @Override
-    public boolean containsAll(Collection<?> collection) {
+    public boolean containsAll(@NotNull Collection<?> collection) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T> T[] toArray(T[] ts) {
+    public <T> T[] toArray(@NotNull T[] ts) {
         throw new UnsupportedOperationException();
     }
 }

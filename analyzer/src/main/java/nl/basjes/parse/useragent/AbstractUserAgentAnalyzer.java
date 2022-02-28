@@ -25,6 +25,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import nl.basjes.parse.useragent.UserAgent.ImmutableUserAgent;
 import nl.basjes.parse.useragent.UserAgent.MutableUserAgent;
 
+import org.jetbrains.annotations.NotNull;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -157,6 +158,7 @@ public class AbstractUserAgentAnalyzer extends AbstractUserAgentAnalyzerDirect i
         return cacheSize;
     }
 
+    @NotNull
     @Override
     public ImmutableUserAgent parse(MutableUserAgent userAgent) {
         // Many caching implementations do not allow null keys and/or values

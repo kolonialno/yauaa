@@ -20,7 +20,8 @@ package nl.basjes.parse.useragent.analyze.treewalker.steps.value;
 import nl.basjes.parse.useragent.analyze.treewalker.steps.Step;
 import nl.basjes.parse.useragent.analyze.treewalker.steps.WalkList.WalkResult;
 import org.antlr.v4.runtime.tree.ParseTree;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 public class StepConcatPostfix extends Step {
 
     private final String postfix;
@@ -35,7 +36,7 @@ public class StepConcatPostfix extends Step {
     }
 
     @Override
-    public WalkResult walk(ParseTree tree, String value) {
+    public WalkResult walk(@NotNull ParseTree tree, @Nullable String value) {
         String actualValue = getActualValue(tree, value);
         String filteredValue = actualValue + postfix;
         return walkNextStep(tree, filteredValue);
