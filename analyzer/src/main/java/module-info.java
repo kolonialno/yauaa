@@ -58,11 +58,13 @@ module nl.basjes.parse.useragent {
     opens nl.basjes.parse.useragent.parse                                   to com.esotericsoftware.kryo;
     opens nl.basjes.parse.useragent.utils                                   to com.esotericsoftware.kryo;
 
+    // Nullability annotatons
+    requires org.jetbrains.annotations;
+
     // Logging
     requires transitive org.apache.logging.log4j;
-    requires static commons.logging;
-    requires static slf4j.api;     // Automatic module name
-//    requires spring.jcl;    // Automatic module name
+    requires org.slf4j;     // Only available with slf4j 2.x
+    requires static spring.jcl;    // Automatic module name
 
     requires com.github.benmanes.caffeine;          // Caching
     requires nl.basjes.collections.prefixmap;       // Lookup data structure

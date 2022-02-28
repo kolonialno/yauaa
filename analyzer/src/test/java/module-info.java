@@ -17,7 +17,7 @@
 
 // We must open all test packages so Junit can read them all.
 @SuppressWarnings({"requires-automatic"})
-open module nl.basjes.tests.parse.useragent {
+open module YauaaTESTS {
     requires transitive nl.basjes.parse.useragent;
 
 //    // Export all packages
@@ -68,6 +68,10 @@ open module nl.basjes.tests.parse.useragent {
     requires org.apache.logging.log4j.core;
     requires org.antlr.antlr4.runtime;
     requires org.apache.commons.lang3;
+
+    // Nullability annotatons
+    requires org.jetbrains.annotations;
+
 }
 
 
