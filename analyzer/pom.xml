@@ -120,7 +120,6 @@
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-slf4j-impl</artifactId>
       <version>${log4j2.version}</version>
-      <scope>provided</scope>
       <exclusions>
         <exclusion>
           <!-- Old version does not adhere to java module system. -->
@@ -137,11 +136,11 @@
     </dependency>
 
     <!-- Needed for the included classes from org.springframework:spring-core -->
+    <!-- The commons-logging:commons-logging:1.2 does not do JPMS             -->
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-jcl</artifactId>
       <version>${spring.version}</version>
-<!--      <scope>provided</scope>-->
     </dependency>
 
     <dependency>
@@ -224,6 +223,20 @@
                 <exclude>META-INF/MANIFEST.MF</exclude>
               </excludes>
             </filter>
+            <filter>
+              <artifact>org.springframework:spring-jcl</artifact>
+              <excludes>
+                <exclude>META-INF/services/**</exclude>
+                <exclude>META-INF/MANIFEST.MF</exclude>
+              </excludes>
+            </filter>
+            <filter>
+              <artifact>org.slf4j:slf4j-api</artifact>
+              <excludes>
+                <exclude>META-INF/services/**</exclude>
+                <exclude>META-INF/MANIFEST.MF</exclude>
+              </excludes>
+            </filter>
           </filters>
           <relocations>
             <relocation>
@@ -238,6 +251,19 @@
               <pattern>org.yaml.snakeyaml</pattern>
               <shadedPattern>${shading-relocation-root}.org.yaml.snakeyaml</shadedPattern>
             </relocation>
+            <relocation>
+              <pattern>org.apache.commons.logging</pattern>
+              <shadedPattern>${shading-relocation-root}.org.apache.commons.logging</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>org.slf4j</pattern>
+              <shadedPattern>${shading-relocation-root}.org.slf4j</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>org.apache.logging.slf4j</pattern>
+              <shadedPattern>${shading-relocation-root}.org.apache.logging.slf4j</shadedPattern>
+            </relocation>
+
           </relocations>
         </configuration>
 
@@ -254,6 +280,9 @@
                   <include>org.antlr:antlr4-runtime</include>
                   <include>org.springframework:spring-core</include>
                   <include>org.yaml:snakeyaml</include>
+                  <include>org.springframework:spring-jcl</include>
+                  <include>org.slf4j:slf4j-api</include>
+                  <include>org.apache.logging.log4j:log4j-slf4j-impl</include>
                 </includes>
               </artifactSet>
             </configuration>
@@ -266,7 +295,8 @@
       <!-- shading and modules do not mix very well.                                                            -->
       <!-- In this specific scenario ALL shaded dependencies are also relocated into a project specific package -->
       <!-- and thus can no longer cause conflicts with other modules.                                           -->
-      <!-- This means we can safely reinsert the module-info.class                                              -->
+      <!-- This means we can safely reinsert the module-info.class which we have modified to not include -->
+      <!-- the shaded classes anymore                                                                   -->
       <plugin>
         <groupId>org.moditect</groupId>
         <artifactId>moditect-maven-plugin</artifactId>
@@ -282,7 +312,7 @@
               <overwriteExistingFiles>true</overwriteExistingFiles>
               <module>
                 <moduleInfoFile>
-                  src/main/java/module-info.java
+                  ${project.basedir}/target/module-info.java
                 </moduleInfoFile>
               </module>
             </configuration>
@@ -383,17 +413,16 @@
           </execution>
 
           <execution>
-            <id>Inject module-info.class into the final jar file</id>
-            <phase>package</phase>
+            <id>Generate post shading module-info file.</id>
+            <phase>prepare-package</phase>
             <goals>
               <goal>exec</goal>
             </goals>
             <configuration>
-              <executable>./inject-module-info-into-jar.sh</executable>
+              <executable>bash</executable>
               <arguments>
-                <argument>${project.groupId}</argument>
-                <argument>${project.artifactId}</argument>
-                <argument>${project.version}</argument>
+                <argument>-c</argument>
+                <argument>grep -F -v '#SHADED' ./src/main/java/module-info.java > ./target/module-info.java</argument>
               </arguments>
             </configuration>
           </execution>
