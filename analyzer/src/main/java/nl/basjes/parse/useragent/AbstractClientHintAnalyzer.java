@@ -23,6 +23,8 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import nl.basjes.collections.PrefixMap;
+import nl.basjes.collections.prefixmap.StringPrefixMap;
 import nl.basjes.parse.useragent.AgentField.MutableAgentField;
 import nl.basjes.parse.useragent.UserAgent.ImmutableUserAgent;
 import nl.basjes.parse.useragent.UserAgent.MutableUserAgent;
@@ -34,7 +36,6 @@ import nl.basjes.parse.useragent.utils.VersionSplitter;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import static nl.basjes.parse.useragent.classify.DeviceClass.MOBILE;
 import static nl.basjes.parse.useragent.classify.DeviceClass.PHONE;
@@ -112,7 +113,7 @@ public class AbstractClientHintAnalyzer extends AbstractUserAgentAnalyzerDirect 
     // If major is 6 and minor is 1 (i.e., Windows 7), return "0.1".
 
     @AllArgsConstructor
-    private static class OSFields {
+    private static class OSFields implements Serializable {
         @Getter String name;              // Windows NT
         @Getter String version;           // 8.1
         @Getter String versionMajor;      // 8
@@ -120,25 +121,25 @@ public class AbstractClientHintAnalyzer extends AbstractUserAgentAnalyzerDirect 
         @Getter String nameVersionMajor;  // Windows 8
     }
 
-    private static final Map<String, OSFields> WINDOWS_VERSION_MAPPING = new TreeMap<>();
+    private static final PrefixMap<OSFields> WINDOWS_VERSION_MAPPING = new StringPrefixMap<>(false);
     static {
-        WINDOWS_VERSION_MAPPING.put("0.1", new OSFields("Windows NT", "7", "7", "Windows 7", "Windows 7"));
-        WINDOWS_VERSION_MAPPING.put("0.2", new OSFields("Windows NT", "8", "8", "Windows 8", "Windows 8"));
-        WINDOWS_VERSION_MAPPING.put("0.3", new OSFields("Windows NT", "8.1", "8", "Windows 8.1", "Windows 8"));
-        WINDOWS_VERSION_MAPPING.put("1",   new OSFields("Windows NT", "10", "10", "Windows 10", "Windows 10"));
-        WINDOWS_VERSION_MAPPING.put("2",   new OSFields("Windows NT", "10", "10", "Windows 10", "Windows 10"));
-        WINDOWS_VERSION_MAPPING.put("3",   new OSFields("Windows NT", "10", "10", "Windows 10", "Windows 10"));
-        WINDOWS_VERSION_MAPPING.put("4",   new OSFields("Windows NT", "10", "10", "Windows 10", "Windows 10"));
-        WINDOWS_VERSION_MAPPING.put("5",   new OSFields("Windows NT", "10", "10", "Windows 10", "Windows 10"));
-        WINDOWS_VERSION_MAPPING.put("6",   new OSFields("Windows NT", "10", "10", "Windows 10", "Windows 10"));
-        WINDOWS_VERSION_MAPPING.put("7",   new OSFields("Windows NT", "10", "10", "Windows 10", "Windows 10"));
-        WINDOWS_VERSION_MAPPING.put("8",   new OSFields("Windows NT", "10", "10", "Windows 10", "Windows 10"));
-        WINDOWS_VERSION_MAPPING.put("9",   new OSFields("Windows NT", "10", "10", "Windows 10", "Windows 10"));
-        WINDOWS_VERSION_MAPPING.put("10",  new OSFields("Windows NT", "10", "10", "Windows 10", "Windows 10"));
-        WINDOWS_VERSION_MAPPING.put("13",  new OSFields("Windows NT", "11", "11", "Windows 11", "Windows 11"));
-        WINDOWS_VERSION_MAPPING.put("14",  new OSFields("Windows NT", "11", "11", "Windows 11", "Windows 11"));
-        WINDOWS_VERSION_MAPPING.put("15",  new OSFields("Windows NT", "11", "11", "Windows 11", "Windows 11"));
-        WINDOWS_VERSION_MAPPING.put("16",  new OSFields("Windows NT", "11", "11", "Windows 11", "Windows 11"));
+        WINDOWS_VERSION_MAPPING.put("0.1", new OSFields("Windows NT",  "7",   "7", "Windows 7",   "Windows 7"));
+        WINDOWS_VERSION_MAPPING.put("0.2", new OSFields("Windows NT",  "8",   "8", "Windows 8",   "Windows 8"));
+        WINDOWS_VERSION_MAPPING.put("0.3", new OSFields("Windows NT",  "8.1", "8", "Windows 8.1", "Windows 8"));
+        WINDOWS_VERSION_MAPPING.put("1",   new OSFields("Windows NT", "10",  "10", "Windows 10",  "Windows 10"));
+        WINDOWS_VERSION_MAPPING.put("2",   new OSFields("Windows NT", "10",  "10", "Windows 10",  "Windows 10"));
+        WINDOWS_VERSION_MAPPING.put("3",   new OSFields("Windows NT", "10",  "10", "Windows 10",  "Windows 10"));
+        WINDOWS_VERSION_MAPPING.put("4",   new OSFields("Windows NT", "10",  "10", "Windows 10",  "Windows 10"));
+        WINDOWS_VERSION_MAPPING.put("5",   new OSFields("Windows NT", "10",  "10", "Windows 10",  "Windows 10"));
+        WINDOWS_VERSION_MAPPING.put("6",   new OSFields("Windows NT", "10",  "10", "Windows 10",  "Windows 10"));
+        WINDOWS_VERSION_MAPPING.put("7",   new OSFields("Windows NT", "10",  "10", "Windows 10",  "Windows 10"));
+        WINDOWS_VERSION_MAPPING.put("8",   new OSFields("Windows NT", "10",  "10", "Windows 10",  "Windows 10"));
+        WINDOWS_VERSION_MAPPING.put("9",   new OSFields("Windows NT", "10",  "10", "Windows 10",  "Windows 10"));
+        WINDOWS_VERSION_MAPPING.put("10",  new OSFields("Windows NT", "10",  "10", "Windows 10",  "Windows 10"));
+        WINDOWS_VERSION_MAPPING.put("13",  new OSFields("Windows NT", "11",  "11", "Windows 11",  "Windows 11"));
+        WINDOWS_VERSION_MAPPING.put("14",  new OSFields("Windows NT", "11",  "11", "Windows 11",  "Windows 11"));
+        WINDOWS_VERSION_MAPPING.put("15",  new OSFields("Windows NT", "11",  "11", "Windows 11",  "Windows 11"));
+        WINDOWS_VERSION_MAPPING.put("16",  new OSFields("Windows NT", "11",  "11", "Windows 11",  "Windows 11"));
     }
 
     private ImmutableUserAgent merge(ImmutableUserAgent originalUserAgent, ClientHints clientHints) {
@@ -162,26 +163,25 @@ public class AbstractClientHintAnalyzer extends AbstractUserAgentAnalyzerDirect 
         String platformVersion = clientHints.getPlatformVersion();
         if (platformVersion != null) {
             MutableAgentField osName    = (MutableAgentField) userAgent.get(UserAgent.OPERATING_SYSTEM_NAME);
-            MutableAgentField osVersion = (MutableAgentField) userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION);
             switch (osName.getValue()) {
                 case "Linux":
                     String majorVersion = VersionSplitter.getInstance().getSingleSplit(platformVersion, 1);
-//                    if (osVersion.isDefaultValue()) {
-//                    overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME), "Linux");
                     overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION), platformVersion);
                     overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION_MAJOR), majorVersion);
                     overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION), osName.getValue() + " " + platformVersion);
                     overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION_MAJOR), osName.getValue() + " " + majorVersion);
-//                    }
                     break;
                 case "Windows NT":
                     if ("Windows".equals(clientHints.getPlatform())) {
-                        OSFields betterOsVersion = WINDOWS_VERSION_MAPPING.get(clientHints.getPlatformVersion());
-                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME), betterOsVersion.getName());
-                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION), betterOsVersion.getVersion());
-                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION_MAJOR), betterOsVersion.getVersionMajor());
-                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION), betterOsVersion.getNameVersion());
-                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION_MAJOR), betterOsVersion.getNameVersionMajor());
+                        OSFields betterOsVersion = WINDOWS_VERSION_MAPPING.getLongestMatch(platformVersion);
+                        if (betterOsVersion != null) {
+                            overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME), betterOsVersion.getName());
+                            overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION), betterOsVersion.getVersion());
+                            overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION_MAJOR), betterOsVersion.getVersionMajor());
+                            overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION), betterOsVersion.getNameVersion());
+                            overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION_MAJOR), betterOsVersion.getNameVersionMajor());
+                            // FIXME: Add         OperatingSystemVersionBuild          : '??'
+                        }
                     }
                     break;
                 default: // We change nothing
@@ -249,30 +249,6 @@ public class AbstractClientHintAnalyzer extends AbstractUserAgentAnalyzerDirect 
                         // Ignore
                 }
             }
-
-            MutableAgentField osName    = (MutableAgentField) userAgent.get(UserAgent.OPERATING_SYSTEM_NAME);
-            MutableAgentField osVersion = (MutableAgentField) userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION);
-            switch (osName.getValue()) {
-                case "Linux":
-                    if (osVersion.isDefaultValue()) {
-                        osVersion.setValue(platformVersion, osVersion.confidence+1);
-                    }
-                    break;
-                case "Windows NT":
-                    if ("Windows".equals(clientHints.getPlatform())) {
-                        OSFields betterOsVersion = WINDOWS_VERSION_MAPPING.get(clientHints.getPlatformVersion());
-                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME), betterOsVersion.getName());
-                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION), betterOsVersion.getVersion());
-                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION_MAJOR), betterOsVersion.getVersionMajor());
-                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION), betterOsVersion.getNameVersion());
-                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION_MAJOR), betterOsVersion.getNameVersionMajor());
-                    }
-                    if (osVersion.isDefaultValue()) {
-                        osVersion.setValue(platformVersion, osVersion.confidence+1);
-                    }
-                    break;
-                default: // We change nothing
-            }
         }
         return new ImmutableUserAgent(userAgent);
     }
@@ -280,9 +256,6 @@ public class AbstractClientHintAnalyzer extends AbstractUserAgentAnalyzerDirect 
     private void overrideValue(AgentField field, String newValue) {
         ((MutableAgentField)field).setValue(newValue, field.getConfidence()+1);
     }
-
-
-
 
     @SuppressWarnings("unchecked") // For all the casts of 'this' to 'B'
     public abstract static class AbstractClientHintAnalyzerDirectBuilder<UAA extends AbstractClientHintAnalyzer, B extends AbstractClientHintAnalyzerDirectBuilder<UAA, B>>

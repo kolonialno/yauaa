@@ -156,7 +156,7 @@ public class HumanHtml {
 
                     if (useClientHints) {
                         sb.append("<table class=\"clientHints\">");
-                        sb.append("<tr><th colspan=2><b><center>Experimental!!</center></b></th></tr>");
+                        sb.append("<tr><th colspan=2><b><center>[Experimental] Examining the User Agent Client Hints.</center></b></th></tr>");
                         sb.append("<tr><th>Available Client Hints</th><th>Value</th></tr>");
                         for (String clientHintHeader : getUserAgentAnalyzer().supportedClientHintHeaders()) {
                             String value = requestHeaders.get(clientHintHeader);

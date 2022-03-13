@@ -48,7 +48,7 @@ public interface CHParser extends Serializable {
      * @return The actual payload string (i.e. without the surrounding '"')
      */
     default String parseSfString(String value) {
-        if (value == null) {
+        if (value == null || value.isEmpty()) {
             return null;
         }
         int length = value.length();
