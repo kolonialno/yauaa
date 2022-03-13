@@ -95,6 +95,12 @@ public interface AgentField extends Serializable {
             reset();
         }
 
+        MutableAgentField(AgentField agentField) {
+            this.defaultValue = agentField.getDefaultValue();
+            this.value = agentField.getValue();
+            this.confidence = agentField.getConfidence();
+        }
+
         public void reset() {
             value = null;
             confidence = -1;

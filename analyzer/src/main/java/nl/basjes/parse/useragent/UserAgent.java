@@ -635,6 +635,19 @@ public interface UserAgent extends Serializable {
         public MutableUserAgent() {
         }
 
+        public MutableUserAgent(ImmutableUserAgent userAgent) {
+            userAgentString = userAgent.userAgentString;
+            hasSyntaxError = userAgent.hasSyntaxError;
+            hasAmbiguity = userAgent.hasAmbiguity;
+            ambiguityCount = userAgent.ambiguityCount;
+
+            for (String fieldName: userAgent.getAvailableFieldNamesSorted()) {
+                allFields.put(fieldName, new MutableAgentField(userAgent.get(fieldName)));
+            }
+
+            setWantedFieldNames(userAgent.getAvailableFieldNamesSorted());
+        }
+
         public MutableUserAgent(Collection<String> wantedFieldNames) {
             setWantedFieldNames(wantedFieldNames);
         }

@@ -524,7 +524,7 @@ public class ConfigLoader {
 
     private void loadYamlTestcase(MappingNode entry, String filename) {
         if (!doingOnlyASingleTest) {
-            String input = null;
+            String userAgent = null;
             String testName = null;
             List<String> options = null;
             Map<String, String> expected = new LinkedHashMap<>();
@@ -541,11 +541,15 @@ public class ConfigLoader {
                     case "input":
                         for (NodeTuple inputTuple : getValueAsMappingNode(tuple, filename).getValue()) {
                             String inputName = getKeyAsString(inputTuple, filename);
-                            if ("user_agent_string".equals(inputName)) {
-                                input = getValueAsString(inputTuple, filename);
-                            }
-                            if ("name".equals(inputName)) {
-                                testName = getValueAsString(inputTuple, filename);
+                            switch (inputName) {
+                                case "user_agent_string":
+                                case "User-Agent":
+                                    userAgent = getValueAsString(inputTuple, filename);
+                                    break;
+                                case "name":
+                                    testName = getValueAsString(inputTuple, filename);
+                                    break;
+                                default:
                             }
                         }
                         break;
@@ -563,14 +567,14 @@ public class ConfigLoader {
                 }
             }
 
-            require(input != null, entry, filename, "Test is missing input");
+            require(userAgent != null, entry, filename, "Test is missing input");
 
             if (expected.isEmpty()) {
                 doingOnlyASingleTest = true;
                 analyzerConfig.clearAllTestCases();
             }
 
-            TestCase testCase = new TestCase(input, testName);
+            TestCase testCase = new TestCase(userAgent, testName);
 
             if (!expected.isEmpty()) {
                 expected.forEach(testCase::expect);

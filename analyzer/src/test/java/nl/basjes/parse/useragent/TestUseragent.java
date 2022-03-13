@@ -160,7 +160,7 @@ class TestUseragent {
 
     @Test
     void testCopying() {
-        MutableAgentField origNull = new MutableAgentField(null);
+        MutableAgentField origNull = new MutableAgentField((String)null);
         origNull.setValue("One", 1);
         MutableAgentField copyNull = new MutableAgentField("Foo"); // Different default!
         assertTrue(copyNull.setValue(origNull));
@@ -174,7 +174,7 @@ class TestUseragent {
 
         MutableAgentField origFoo = new MutableAgentField("Foo");
         origFoo.setValue("Two", 2);
-        MutableAgentField copyFoo = new MutableAgentField(null); // Different default!
+        MutableAgentField copyFoo = new MutableAgentField((String)null); // Different default!
         copyFoo.setValue(origFoo);
 
         assertEquals("Two", copyFoo.getValue());
@@ -205,7 +205,7 @@ class TestUseragent {
         MutableAgentField field3 = new MutableAgentField("Foo"); // Same, different confidence
         field3.setValue("One", 2);
 
-        MutableAgentField field4 = new MutableAgentField(null); // Same, different default
+        MutableAgentField field4 = new MutableAgentField((String)null); // Same, different default
         field4.setValue("One", 1);
 
         // We compare the base agent with 4 variations
@@ -217,7 +217,7 @@ class TestUseragent {
         mutableAgent4.setImmediateForTesting("Field", field4); // Different field default value
 
         // Check em
-        assertEquals(baseAgent, baseAgent);
+        assertEquals(baseAgent, baseAgent); // Ensure that equals on the same results in true
         assertEquals(baseAgent, mutableAgent0);
         assertEquals(mutableAgent0, baseAgent);
         assertEquals(baseAgent.hashCode(), mutableAgent0.hashCode());
@@ -287,7 +287,7 @@ class TestUseragent {
         MutableAgentField field3 = new MutableAgentField("Foo"); // Same, different confidence
         field3.setValue("One", 2);
 
-        MutableAgentField field4 = new MutableAgentField(null); // Same, different default
+        MutableAgentField field4 = new MutableAgentField((String)null); // Same, different default
         field4.setValue("One", 1);
 
         // This is mainly used when rendering in a debugger.
