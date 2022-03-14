@@ -44,7 +44,7 @@ public final class ClientHintAnalyzer extends AbstractClientHintAnalyzer impleme
     public static void configureKryo(Object kryoInstance) {
         Kryo kryo = (Kryo) kryoInstance;
         kryo.register(ClientHintAnalyzer.class);
-        AbstractUserAgentAnalyzer.configureKryo(kryo);
+        AbstractClientHintAnalyzer.configureKryo(kryo);
     }
 
 }

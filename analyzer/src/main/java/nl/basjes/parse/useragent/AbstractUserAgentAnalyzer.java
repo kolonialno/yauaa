@@ -68,7 +68,7 @@ public class AbstractUserAgentAnalyzer extends AbstractClientHintAnalyzer implem
         Kryo kryo = (Kryo) kryoInstance;
         kryo.register(AbstractUserAgentAnalyzer.class);
         kryo.register(DefaultCacheInstantiator.class);
-        AbstractUserAgentAnalyzerDirect.configureKryo(kryo);
+        AbstractClientHintAnalyzer.configureKryo(kryo);
     }
 
     public static class KryoSerializer extends AbstractUserAgentAnalyzerDirect.KryoSerializer {

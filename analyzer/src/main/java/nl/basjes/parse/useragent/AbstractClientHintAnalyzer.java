@@ -31,6 +31,17 @@ import nl.basjes.parse.useragent.UserAgent.MutableUserAgent;
 import nl.basjes.parse.useragent.clienthints.ClientHintParser;
 import nl.basjes.parse.useragent.clienthints.ClientHints;
 import nl.basjes.parse.useragent.clienthints.ClientHints.BrandVersion;
+import nl.basjes.parse.useragent.clienthints.Constants;
+import nl.basjes.parse.useragent.clienthints.parsers.BrandVersionListParser;
+import nl.basjes.parse.useragent.clienthints.parsers.CHParser;
+import nl.basjes.parse.useragent.clienthints.parsers.ParseSecChUa;
+import nl.basjes.parse.useragent.clienthints.parsers.ParseSecChUaArch;
+import nl.basjes.parse.useragent.clienthints.parsers.ParseSecChUaFullVersionList;
+import nl.basjes.parse.useragent.clienthints.parsers.ParseSecChUaMobile;
+import nl.basjes.parse.useragent.clienthints.parsers.ParseSecChUaModel;
+import nl.basjes.parse.useragent.clienthints.parsers.ParseSecChUaPlatform;
+import nl.basjes.parse.useragent.clienthints.parsers.ParseSecChUaPlatformVersion;
+import nl.basjes.parse.useragent.clienthints.parsers.ParseSecChUaWoW64;
 import nl.basjes.parse.useragent.utils.VersionSplitter;
 import nl.basjes.parse.useragent.utils.WordSplitter;
 
@@ -64,6 +75,19 @@ public class AbstractClientHintAnalyzer extends AbstractUserAgentAnalyzerDirect 
     public static void configureKryo(Object kryoInstance) {
         Kryo kryo = (Kryo) kryoInstance;
         kryo.register(AbstractClientHintAnalyzer.class);
+        kryo.register(ClientHintParser.class);
+        kryo.register(ClientHints.class);
+        kryo.register(Constants.class);
+        kryo.register(BrandVersionListParser.class);
+        kryo.register(CHParser.class);
+        kryo.register(ParseSecChUa.class);
+        kryo.register(ParseSecChUaArch.class);
+        kryo.register(ParseSecChUaFullVersionList.class);
+        kryo.register(ParseSecChUaMobile.class);
+        kryo.register(ParseSecChUaModel.class);
+        kryo.register(ParseSecChUaPlatform.class);
+        kryo.register(ParseSecChUaPlatformVersion.class);
+        kryo.register(ParseSecChUaWoW64.class);
         AbstractUserAgentAnalyzerDirect.configureKryo(kryo);
     }
 
