@@ -271,6 +271,7 @@ public class HumanHtml {
 
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.add("Accept-CH", String.join(", ", getUserAgentAnalyzer().supportedClientHintHeaders()));
+        responseHeaders.add("Critical-CH", String.join(", ", getUserAgentAnalyzer().supportedClientHintHeaders()));
 
         return new ResponseEntity<>(sb.toString(), responseHeaders, OK);
     }
