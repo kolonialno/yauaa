@@ -32,11 +32,13 @@ import nl.basjes.parse.useragent.clienthints.ClientHintParser;
 import nl.basjes.parse.useragent.clienthints.ClientHints;
 import nl.basjes.parse.useragent.clienthints.ClientHints.BrandVersion;
 import nl.basjes.parse.useragent.utils.VersionSplitter;
+import nl.basjes.parse.useragent.utils.WordSplitter;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import static nl.basjes.parse.useragent.UserAgent.UNKNOWN_VALUE;
 import static nl.basjes.parse.useragent.classify.DeviceClass.MOBILE;
 import static nl.basjes.parse.useragent.classify.DeviceClass.PHONE;
 import static nl.basjes.parse.useragent.classify.DeviceClass.TABLET;
@@ -156,6 +158,17 @@ public class AbstractClientHintAnalyzer extends AbstractUserAgentAnalyzerDirect 
                 } else {
                     deviceClass.setValue(TABLET.getValue(), deviceClass.getConfidence() + 1);
                 }
+            }
+        }
+
+        // Improve the Device Brand/Name if it is unknown.
+        if (clientHints.getModel() != null) {
+            MutableAgentField deviceBrand = (MutableAgentField) userAgent.get(UserAgent.DEVICE_BRAND);
+            MutableAgentField deviceName = (MutableAgentField) userAgent.get(UserAgent.DEVICE_NAME);
+            if (UNKNOWN_VALUE.equals(deviceBrand.getValue()) ||
+                UNKNOWN_VALUE.equals(deviceName.getValue())) {
+                overrideValue(deviceBrand, WordSplitter.getInstance().getSingleSplit(clientHints.getModel(), 1));
+                overrideValue(deviceName, clientHints.getModel());
             }
         }
 
