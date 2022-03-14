@@ -184,4 +184,73 @@ class TestClientHintsAnalysis {
         checkExpectations(analyzer.parse(headers), expectations);
     }
 
+    @Test
+    void testChromeAndroid11ReducedUA() {
+        Map<String, String> expectations = new TreeMap<>();
+
+        // Real values Chrome on Windows 11
+        Map<String, String> headers=new TreeMap<>();
+        headers.put("User-Agent", "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Mobile Safari/537.36");
+
+        // ------------------------------------------
+        // Without ClientHints
+        expectations.put("DeviceClass",                     "Phone");
+        expectations.put("DeviceName",                      "Unknown");
+        expectations.put("DeviceBrand",                     "Unknown");
+        expectations.put("OperatingSystemClass",            "Mobile");
+        expectations.put("OperatingSystemName",             "Android");
+        expectations.put("OperatingSystemVersion",          "??");
+        expectations.put("OperatingSystemVersionMajor",     "??");
+        expectations.put("OperatingSystemNameVersion",      "Android ??");
+        expectations.put("OperatingSystemNameVersionMajor", "Android ??");
+        expectations.put("LayoutEngineClass",               "Browser");
+        expectations.put("LayoutEngineName",                "Blink");
+        expectations.put("LayoutEngineVersion",             "100");
+        expectations.put("LayoutEngineVersionMajor",        "100");
+        expectations.put("LayoutEngineNameVersion",         "Blink 100");
+        expectations.put("LayoutEngineNameVersionMajor",    "Blink 100");
+        expectations.put("AgentClass",                      "Browser");
+        expectations.put("AgentName",                       "Chrome");
+        expectations.put("AgentVersion",                    "100");
+        expectations.put("AgentVersionMajor",               "100");
+        expectations.put("AgentNameVersion",                "Chrome 100");
+        expectations.put("AgentNameVersionMajor",           "Chrome 100");
+
+
+        checkExpectations(analyzer.parse(headers), expectations);
+
+        // ------------------------------------------
+        // Add Standard ClientHints
+        headers.put("Sec-CH-UA",                            "\"(Not(A:Brand\";v=\"8\", \"Chromium\";v=\"100\", \"Google Chrome\";v=\"100\"");
+        headers.put("Sec-CH-UA-Mobile",                     "?1");
+        headers.put("Sec-CH-UA-Platform",                   "\"Android\"");
+
+        // No change in expectations.
+        checkExpectations(analyzer.parse(headers), expectations);
+
+        // ------------------------------------------
+        // Add Full ClientHints (i.e. after the server requested everything)
+        headers.put("Sec-CH-UA-Arch",                       "");
+        headers.put("Sec-CH-UA-Full-Version-List",          "\"(Not(A:Brand\";v=\"8.0.0.0\", \"Chromium\";v=\"100.0.4896.30\", \"Google Chrome\";v=\"100.0.4896.30\"");
+        headers.put("Sec-CH-UA-Model",                      "\"Nokia 7.2\"");
+        headers.put("Sec-CH-UA-Platform-Version",           "\"11.0.0\"");
+
+        expectations.put("DeviceClass",                     "Phone");
+        expectations.put("DeviceBrand",                     "Nokia");
+        expectations.put("DeviceName",                      "Nokia 7.2");
+
+        expectations.put("OperatingSystemVersion",          "11.0.0");
+        expectations.put("OperatingSystemVersionMajor",     "11");
+        expectations.put("OperatingSystemNameVersion",      "Android 11.0.0");
+        expectations.put("OperatingSystemNameVersionMajor", "Android 11");
+
+        expectations.put("LayoutEngineVersion",             "100.0.4896.30");
+        expectations.put("LayoutEngineNameVersion",         "Blink 100.0.4896.30");
+
+        expectations.put("AgentVersion",                    "100.0.4896.30");
+        expectations.put("AgentNameVersion",                "Chrome 100.0.4896.30");
+
+        checkExpectations(analyzer.parse(headers), expectations);
+    }
+
 }

@@ -493,6 +493,36 @@ public interface UserAgent extends Serializable {
         return sb.toString();
     }
 
+
+    default String toJavaExpectationsList() {
+        return toJavaExpectationsList(getCleanedAvailableFieldNamesSorted());
+    }
+
+    default String toJavaExpectationsList(List<String> fieldNames) {
+        StringBuilder sb        = new StringBuilder();
+        int    maxValueLength   = 0;
+        for (String fieldName : fieldNames) {
+            maxValueLength = Math.max(maxValueLength, fieldName.length());
+        }
+
+        for (String fieldName : fieldNames) {
+            if (!USERAGENT_FIELDNAME.equals(fieldName)) {
+                AgentField field = get(fieldName);
+                if (field != null) {
+                    String value = StringEscapeUtils.escapeJava(getValue(fieldName));
+                    sb.append("    expectations.put(\"").append(fieldName).append("\", ");
+                    for (int l = fieldName.length(); l < maxValueLength + 2; l++) {
+                        sb.append(' ');
+                    }
+                    sb.append("\"").append(value).append("\");");
+                    sb.append('\n');
+                }
+            }
+        }
+
+        return sb.toString();
+    }
+
     default boolean uaEquals(Object o) {
         if (this == o) {
             return true;
