@@ -160,31 +160,65 @@ public class AbstractClientHintAnalyzer extends AbstractUserAgentAnalyzerDirect 
         }
 
         // Improve the OS info.
+        // https://wicg.github.io/ua-client-hints/#sec-ch-ua-platform
+        // The Sec-CH-UA-Platform request header field gives a server information about the platform on which
+        // a given user agent is executing. It is a Structured Header whose value MUST be a string [RFC8941].
+        // Its value SHOULD match one of the following common platform values:
+        // - "Android"
+        // - "Chrome OS"
+        // - "iOS"
+        // - "Linux"
+        // - "macOS"
+        // - "Windows"
+        // - "Unknown"
+        String platform = clientHints.getPlatform();
         String platformVersion = clientHints.getPlatformVersion();
-        if (platformVersion != null) {
-            MutableAgentField osName    = (MutableAgentField) userAgent.get(UserAgent.OPERATING_SYSTEM_NAME);
-            switch (osName.getValue()) {
-                case "Linux":
-                    String majorVersion = VersionSplitter.getInstance().getSingleSplit(platformVersion, 1);
+        if (platform != null && platformVersion != null) {
+//            MutableAgentField osName    = (MutableAgentField) userAgent.get(UserAgent.OPERATING_SYSTEM_NAME);
+            String majorVersion = VersionSplitter.getInstance().getSingleSplit(platformVersion, 1);
+            switch (platform) {
+                case "macOS":
+                    platform = "Mac OS";
+                    overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME), platform);
                     overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION), platformVersion);
                     overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION_MAJOR), majorVersion);
-                    overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION), osName.getValue() + " " + platformVersion);
-                    overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION_MAJOR), osName.getValue() + " " + majorVersion);
+                    overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION), platform + " " + platformVersion);
+                    overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION_MAJOR), platform + " " + majorVersion);
                     break;
-                case "Windows NT":
-                    if ("Windows".equals(clientHints.getPlatform())) {
-                        OSFields betterOsVersion = WINDOWS_VERSION_MAPPING.getLongestMatch(platformVersion);
-                        if (betterOsVersion != null) {
-                            overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME), betterOsVersion.getName());
-                            overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION), betterOsVersion.getVersion());
-                            overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION_MAJOR), betterOsVersion.getVersionMajor());
-                            overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION), betterOsVersion.getNameVersion());
-                            overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION_MAJOR), betterOsVersion.getNameVersionMajor());
-                            // FIXME: Add         OperatingSystemVersionBuild          : '??'
-                        }
+
+                case "Android":
+                case "Chrome OS":
+                case "iOS":
+                case "Linux":
+                    overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME), platform);
+                    overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION), platformVersion);
+                    overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION_MAJOR), majorVersion);
+                    overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION), platform + " " + platformVersion);
+                    overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION_MAJOR), platform + " " + majorVersion);
+                    break;
+
+                case "Windows":
+                    OSFields betterOsVersion = WINDOWS_VERSION_MAPPING.getLongestMatch(platformVersion);
+                    if (betterOsVersion != null) {
+                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME), betterOsVersion.getName());
+                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION), betterOsVersion.getVersion());
+                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION_MAJOR), betterOsVersion.getVersionMajor());
+                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION), betterOsVersion.getNameVersion());
+                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION_MAJOR), betterOsVersion.getNameVersionMajor());
+                        // FIXME: Add         OperatingSystemVersionBuild          : '??'
                     }
                     break;
-                default: // We change nothing
+
+                case "Unknown":
+                default:
+                    if (platformVersion != null && !platformVersion.trim().isEmpty()) {
+                        platform = userAgent.getValue(UserAgent.OPERATING_SYSTEM_NAME);
+                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION), platformVersion);
+                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION_MAJOR), majorVersion);
+                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION), platform + " " + platformVersion);
+                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION_MAJOR), platform + " " + majorVersion);
+                    }
+                    break;
             }
         }
 

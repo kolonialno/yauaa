@@ -60,6 +60,8 @@ class TestClientHintsAnalysis {
         Map<String, String> headers=new TreeMap<>();
         headers.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36");
 
+        // ------------------------------------------
+        // Without ClientHints
         expectations.put("DeviceClass",                     "Desktop");
         expectations.put("DeviceName",                      "Desktop");
         expectations.put("DeviceBrand",                     "Unknown");
@@ -84,10 +86,10 @@ class TestClientHintsAnalysis {
         expectations.put("AgentNameVersion",                "Chrome 99.0.4844.51");
         expectations.put("AgentNameVersionMajor",           "Chrome 99");
 
-        // Without ClientHints
         userAgent = analyzer.parse(headers);
         checkExpectations(userAgent, expectations);
 
+        // ------------------------------------------
         // Add Standard ClientHints
         headers.put("Sec-CH-UA",                            "\" Not A;Brand\";v=\"99\", \"Chromium\";v=\"99\", \"Google Chrome\";v=\"99\"");
         headers.put("Sec-CH-UA-Mobile",                     "?0");
@@ -96,6 +98,7 @@ class TestClientHintsAnalysis {
         userAgent = analyzer.parse(headers);
         checkExpectations(userAgent, expectations);
 
+        // ------------------------------------------
         // Add the extra ClientHints (i.e. after the server requested everything)
         headers.put("Sec-CH-UA-Arch",                       "\"x86\"");
         headers.put("Sec-CH-UA-Full-Version-List",          "\" Not A;Brand\";v=\"99.0.0.0\", \"Chromium\";v=\"99.0.4844.51\", \"Google Chrome\";v=\"99.0.4844.51\"");
@@ -125,7 +128,7 @@ class TestClientHintsAnalysis {
         Map<String, String> headers=new TreeMap<>();
         headers.put("User-Agent",  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.0.0 Safari/537.36");
 
-        // ----------------------------------------
+        // ------------------------------------------
         // Without ClientHints
         expectations.put("DeviceClass",                     "Desktop");
         expectations.put("DeviceName",                      "Desktop");
@@ -152,7 +155,7 @@ class TestClientHintsAnalysis {
         expectations.put("AgentNameVersionMajor",           "Chrome 99");
         checkExpectations(analyzer.parse(headers), expectations);
 
-        // ----------------------------------------
+        // ------------------------------------------
         // Add Standard ClientHints
         headers.put("Sec-CH-UA",                            "\" Not A;Brand\";v=\"99\", \"Chromium\";v=\"99\", \"Google Chrome\";v=\"99\"");
         headers.put("Sec-CH-UA-Mobile",                     "?0");
@@ -160,7 +163,7 @@ class TestClientHintsAnalysis {
         // No change in expectations.
         checkExpectations(analyzer.parse(headers), expectations);
 
-        // ----------------------------------------
+        // ------------------------------------------
         // Add Full ClientHints (i.e. after the server requested everything)
         headers.put("Sec-CH-UA-Arch",                       "\"x86\"");
         headers.put("Sec-CH-UA-Full-Version-List",          "\" Not A;Brand\";v=\"99.0.0.0\", \"Chromium\";v=\"99.0.4844.51\", \"Google Chrome\";v=\"99.0.4844.51\"");
