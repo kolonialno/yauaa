@@ -18,7 +18,7 @@
 package nl.basjes.parse.useragent.servlet;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import nl.basjes.parse.useragent.UserAgentAnalyzer;
+import nl.basjes.parse.useragent.UserAgentClientHintsAnalyzer;
 import nl.basjes.parse.useragent.servlet.api.OutputType;
 import nl.basjes.parse.useragent.servlet.exceptions.YauaaIsBusyStarting;
 import org.apache.logging.log4j.LogManager;
@@ -47,12 +47,12 @@ public class ParseService {
         setInstance(this);
     }
 
-    private UserAgentAnalyzer  userAgentAnalyzer               = null;
+    private UserAgentClientHintsAnalyzer userAgentAnalyzer  = null;
     private long               initStartMoment;
     private boolean            userAgentAnalyzerIsAvailable    = false;
     private String             userAgentAnalyzerFailureMessage = null;
 
-    public static UserAgentAnalyzer getUserAgentAnalyzer() {
+    public static UserAgentClientHintsAnalyzer getAnalyzer() {
         return instance.userAgentAnalyzer;
     }
 
@@ -74,7 +74,8 @@ public class ParseService {
             initStartMoment = System.currentTimeMillis();
             new Thread(() -> {
                 try {
-                    userAgentAnalyzer = UserAgentAnalyzer.newBuilder()
+                    userAgentAnalyzer = UserAgentClientHintsAnalyzer
+                        .newBuilder()
                         .hideMatcherLoadStats()
                         .addOptionalResources("file:UserAgents*/*.yaml")
                         .immediateInitialization()
@@ -98,7 +99,7 @@ public class ParseService {
     @PreDestroy
     public void preDestroy() {
         if (userAgentAnalyzer != null) {
-            UserAgentAnalyzer uaa = userAgentAnalyzer;
+            UserAgentClientHintsAnalyzer uaa = userAgentAnalyzer;
             // First we disable it for all uses.
             userAgentAnalyzer = null;
             userAgentAnalyzerIsAvailable = false;

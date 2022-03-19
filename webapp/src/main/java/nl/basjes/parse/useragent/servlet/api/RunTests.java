@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import nl.basjes.parse.useragent.UserAgentAnalyzer;
+import nl.basjes.parse.useragent.UserAgentClientHintsAnalyzer;
 import nl.basjes.parse.useragent.config.TestCase;
 import nl.basjes.parse.useragent.servlet.ParseService;
 import nl.basjes.parse.useragent.servlet.exceptions.YauaaTestsFailed;
@@ -62,7 +62,7 @@ public class RunTests {
     )
     public String getPreHeat() {
         ensureStartedForApis(OutputType.JSON);
-        UserAgentAnalyzer userAgentAnalyzer = ParseService.getUserAgentAnalyzer();
+        UserAgentClientHintsAnalyzer userAgentAnalyzer = ParseService.getAnalyzer();
 
         final int cacheSize = userAgentAnalyzer.getCacheSize();
         userAgentAnalyzer.disableCaching();
@@ -102,7 +102,7 @@ public class RunTests {
         produces = TEXT_PLAIN_VALUE
     )
     public String getRunTests() {
-        UserAgentAnalyzer userAgentAnalyzer = ParseService.getUserAgentAnalyzer();
+        UserAgentClientHintsAnalyzer userAgentAnalyzer = ParseService.getAnalyzer();
         List<TestCase> testCases = userAgentAnalyzer.getTestCases();
 
         long start = System.nanoTime();

@@ -23,14 +23,14 @@ import com.esotericsoftware.kryo.Kryo;
 import java.io.Serializable;
 
 @DefaultSerializer(AbstractUserAgentAnalyzer.KryoSerializer.class)
-public final class UserAgentWithClientHintAnalyzer extends AbstractClientHintAnalyzer implements Serializable {
+public final class UserAgentClientHintsAnalyzer extends AbstractUserAgentClientHintsAnalyzer implements Serializable {
 
-    public static UserAgentWithClientHintAnalyzerBuilder newBuilder() {
-        return new UserAgentWithClientHintAnalyzerBuilder(new UserAgentWithClientHintAnalyzer());
+    public static UserAgentClientHintsAnalyzerBuilder newBuilder() {
+        return new UserAgentClientHintsAnalyzerBuilder(new UserAgentClientHintsAnalyzer());
     }
 
-    public static final class UserAgentWithClientHintAnalyzerBuilder extends AbstractUserAgentWithClientHintAnalyzerBuilder<UserAgentWithClientHintAnalyzer, UserAgentWithClientHintAnalyzerBuilder> {
-        private UserAgentWithClientHintAnalyzerBuilder(UserAgentWithClientHintAnalyzer newUaa) {
+    public static final class UserAgentClientHintsAnalyzerBuilder extends AbstractUserAgentClientHintsAnalyzerBuilder<UserAgentClientHintsAnalyzer, UserAgentClientHintsAnalyzerBuilder> {
+        private UserAgentClientHintsAnalyzerBuilder(UserAgentClientHintsAnalyzer newUaa) {
             super(newUaa);
         }
     }
@@ -43,8 +43,8 @@ public final class UserAgentWithClientHintAnalyzer extends AbstractClientHintAna
      */
     public static void configureKryo(Object kryoInstance) {
         Kryo kryo = (Kryo) kryoInstance;
-        kryo.register(UserAgentWithClientHintAnalyzer.class);
-        AbstractClientHintAnalyzer.configureKryo(kryo);
+        kryo.register(UserAgentClientHintsAnalyzer.class);
+        AbstractUserAgentClientHintsAnalyzer.configureKryo(kryo);
     }
 
 }

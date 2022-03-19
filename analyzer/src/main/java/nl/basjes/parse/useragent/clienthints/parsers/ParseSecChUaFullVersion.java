@@ -17,7 +17,7 @@
 
 package nl.basjes.parse.useragent.clienthints.parsers;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
+import nl.basjes.parse.useragent.clienthints.ClientHintParser;
 import nl.basjes.parse.useragent.clienthints.ClientHints;
 import nl.basjes.parse.useragent.clienthints.ClientHints.BrandVersion;
 
@@ -33,7 +33,18 @@ public class ParseSecChUaFullVersion implements CHParser {
     private transient ConcurrentMap<String, List<BrandVersion>> cache;
 
     public ParseSecChUaFullVersion() {
-        cache = Caffeine.newBuilder().maximumSize(10000).<String, List<BrandVersion>>build().asMap();
+        // Nothing to do right now
+    }
+
+    @SuppressWarnings("unchecked")
+    public void initializeCache(ClientHintParser.ClientHintCacheInstantiator<?> clientHintCacheInstantiator, int cacheSize) {
+        cache = (ConcurrentMap<String, List<BrandVersion>>) clientHintCacheInstantiator.instantiateCache(cacheSize);
+    }
+
+    public void clearCache() {
+        if (cache != null) {
+            cache.clear();
+        }
     }
 
     //   From https://wicg.github.io/ua-client-hints/#http-ua-hints

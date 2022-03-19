@@ -68,7 +68,7 @@ public class AbstractUserAgentAnalyzer extends AbstractUserAgentAnalyzerDirect i
         Kryo kryo = (Kryo) kryoInstance;
         kryo.register(AbstractUserAgentAnalyzer.class);
         kryo.register(DefaultCacheInstantiator.class);
-        AbstractClientHintAnalyzer.configureKryo(kryo);
+        AbstractUserAgentClientHintsAnalyzer.configureKryo(kryo);
     }
 
     public static class KryoSerializer extends AbstractUserAgentAnalyzerDirect.KryoSerializer {
@@ -208,7 +208,7 @@ public class AbstractUserAgentAnalyzer extends AbstractUserAgentAnalyzerDirect i
 
         /**
          * Specify a custom class to create the cache.
-         * Use this if the default Synchronized LRUMap is unsuitable for your needs.
+         * Use this if the default Caffeine cache is unsuitable for your needs.
          * @param cacheInstantiator The class that will create a new cache instance when requested.
          * @return the current Builder instance.
          */

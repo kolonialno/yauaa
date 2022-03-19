@@ -17,6 +17,7 @@
 
 package nl.basjes.parse.useragent.clienthints;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import nl.basjes.parse.useragent.clienthints.parsers.CHParser;
 import nl.basjes.parse.useragent.clienthints.parsers.ParseSecChUa;
 import nl.basjes.parse.useragent.clienthints.parsers.ParseSecChUaArch;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 public class ClientHintParser implements Serializable {
@@ -86,4 +88,37 @@ public class ClientHintParser implements Serializable {
         return "ClientHintAnalyzer:" + getClass().getSimpleName();
     }
 
+    public interface ClientHintCacheInstantiator<T extends Serializable> extends Serializable {
+        /**
+         * A single method that must create a new instance of the cache.
+         * The returned instance MUST implement at least the {@link Map#get} and {@link Map#put}
+         * methods in a threadsafe way if you intend to use this in a multithreaded scenario.
+         * Yauaa only uses the put and get methods and in exceptional cases the clear method.
+         * An implementation that does some kind of automatic cleaning of obsolete values is recommended (like LRU).
+         * @param cacheSize is the size of the new cache (which will be >= 1)
+         * @return Instance of the new cache.
+         */
+        ConcurrentMap<String, T> instantiateCache(int cacheSize);
+    }
+
+    static class DefaultClientHintCacheInstantiator<T extends Serializable> implements ClientHintCacheInstantiator<T> {
+        public ConcurrentMap<String, T> instantiateCache(int cacheSize) {
+            return Caffeine.newBuilder().maximumSize(cacheSize).<String, T>build().asMap();
+        }
+    }
+
+    private ClientHintCacheInstantiator<?> clientHintCacheInstantiator = new DefaultClientHintCacheInstantiator<>();
+    private int cacheSize;
+
+    public void setHintCacheInstantiator(ClientHintCacheInstantiator<?> newClientHintCacheInstantiator) {
+        this.clientHintCacheInstantiator = newClientHintCacheInstantiator;
+    }
+
+    public synchronized void initializeCache() {
+        parsers.values().forEach(parser -> parser.initializeCache(clientHintCacheInstantiator, cacheSize));
+    }
+
+    public synchronized void clearCache() {
+        parsers.values().forEach(CHParser::clearCache);
+    }
 }

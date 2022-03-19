@@ -49,7 +49,7 @@ import static nl.basjes.parse.useragent.UserAgent.DEVICE_CLASS;
 import static nl.basjes.parse.useragent.UserAgent.STANDARD_FIELDS;
 import static nl.basjes.parse.useragent.clienthints.Constants.USERAGENT_HEADER;
 import static nl.basjes.parse.useragent.servlet.ParseService.getInitStartMoment;
-import static nl.basjes.parse.useragent.servlet.ParseService.getUserAgentAnalyzer;
+import static nl.basjes.parse.useragent.servlet.ParseService.getAnalyzer;
 import static nl.basjes.parse.useragent.servlet.ParseService.getUserAgentAnalyzerFailureMessage;
 import static nl.basjes.parse.useragent.servlet.ParseService.userAgentAnalyzerIsAvailable;
 import static nl.basjes.parse.useragent.servlet.api.DetermineUserAgentTags.getTags;
@@ -138,11 +138,11 @@ public class HumanHtml {
                 List<UserAgent> userAgents = new ArrayList<>();
 
                 if (useClientHints) {
-                    userAgents.add(getUserAgentAnalyzer().parse(requestHeaders));
+                    userAgents.add(getAnalyzer().parse(requestHeaders));
                 } else {
                     final List<String> userAgentStrings = splitPerFilledLine(userAgentString);
                     for (String ua : userAgentStrings) {
-                        userAgents.add(getUserAgentAnalyzer().parse(ua));
+                        userAgents.add(getAnalyzer().parse(ua));
                     }
                 }
                 stopParse = System.nanoTime();
@@ -158,7 +158,7 @@ public class HumanHtml {
                         sb.append("<table class=\"clientHints\">");
                         sb.append("<tr><th colspan=2><b><center>[Experimental] Examining the User Agent Client Hints.</center></b></th></tr>");
                         sb.append("<tr><th>Available Client Hints</th><th>Value</th></tr>");
-                        for (String clientHintHeader : getUserAgentAnalyzer().supportedClientHintHeaders()) {
+                        for (String clientHintHeader : getAnalyzer().supportedClientHintHeaders()) {
                             String value = requestHeaders.get(clientHintHeader);
                             if (value != null) {
                                 sb.append("<tr><td>").append(clientHintHeader).append("</td><td>").append(value).append("</td></tr>");
@@ -270,8 +270,8 @@ public class HumanHtml {
         }
 
         HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.add("Accept-CH", String.join(", ", getUserAgentAnalyzer().supportedClientHintHeaders()));
-        responseHeaders.add("Critical-CH", String.join(", ", getUserAgentAnalyzer().supportedClientHintHeaders()));
+        responseHeaders.add("Accept-CH", String.join(", ", getAnalyzer().supportedClientHintHeaders()));
+        responseHeaders.add("Critical-CH", String.join(", ", getAnalyzer().supportedClientHintHeaders()));
 
         return new ResponseEntity<>(sb.toString(), responseHeaders, OK);
     }

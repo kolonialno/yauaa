@@ -17,6 +17,7 @@
 
 package nl.basjes.parse.useragent.clienthints.parsers;
 
+import nl.basjes.parse.useragent.clienthints.ClientHintParser.ClientHintCacheInstantiator;
 import nl.basjes.parse.useragent.clienthints.ClientHints;
 
 import javax.annotation.Nonnull;
@@ -75,4 +76,13 @@ public interface CHParser extends Serializable {
         }
         return null; // Bad input
     }
+
+    default void initializeCache(ClientHintCacheInstantiator<?> clientHintCacheInstantiator, int cacheSize) {
+        // No cache implemented by default.
+    }
+
+    default void clearCache() {
+        // No cache implemented by default.
+    }
+
 }

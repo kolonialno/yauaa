@@ -29,6 +29,7 @@ import nl.basjes.parse.useragent.AgentField.MutableAgentField;
 import nl.basjes.parse.useragent.UserAgent.ImmutableUserAgent;
 import nl.basjes.parse.useragent.UserAgent.MutableUserAgent;
 import nl.basjes.parse.useragent.clienthints.ClientHintParser;
+import nl.basjes.parse.useragent.clienthints.ClientHintParser.ClientHintCacheInstantiator;
 import nl.basjes.parse.useragent.clienthints.ClientHints;
 import nl.basjes.parse.useragent.clienthints.ClientHints.BrandVersion;
 import nl.basjes.parse.useragent.clienthints.Constants;
@@ -55,12 +56,12 @@ import static nl.basjes.parse.useragent.classify.DeviceClass.PHONE;
 import static nl.basjes.parse.useragent.classify.DeviceClass.TABLET;
 import static nl.basjes.parse.useragent.clienthints.Constants.USERAGENT_HEADER;
 
-@DefaultSerializer(AbstractClientHintAnalyzer.KryoSerializer.class)
-public class AbstractClientHintAnalyzer extends AbstractUserAgentAnalyzer implements Serializable {
+@DefaultSerializer(AbstractUserAgentClientHintsAnalyzer.KryoSerializer.class)
+public class AbstractUserAgentClientHintsAnalyzer extends AbstractUserAgentAnalyzer implements Serializable {
 
     private ClientHintParser clientHintParser;
 
-    protected AbstractClientHintAnalyzer() {
+    protected AbstractUserAgentClientHintsAnalyzer() {
         super();
         clientHintParser = new ClientHintParser();
     }
@@ -74,7 +75,7 @@ public class AbstractClientHintAnalyzer extends AbstractUserAgentAnalyzer implem
      */
     public static void configureKryo(Object kryoInstance) {
         Kryo kryo = (Kryo) kryoInstance;
-        kryo.register(AbstractClientHintAnalyzer.class);
+        kryo.register(AbstractUserAgentClientHintsAnalyzer.class);
         kryo.register(ClientHintParser.class);
         kryo.register(ClientHints.class);
         kryo.register(Constants.class);
@@ -102,10 +103,53 @@ public class AbstractClientHintAnalyzer extends AbstractUserAgentAnalyzer implem
         }
 
         @Override
-        public AbstractClientHintAnalyzer read(Kryo kryo, Input input, Class<? extends AbstractUserAgentAnalyzerDirect> type) {
-            final AbstractClientHintAnalyzer uaa = (AbstractClientHintAnalyzer) super.read(kryo, input, type);
-            return uaa;
+        public AbstractUserAgentClientHintsAnalyzer read(Kryo kryo, Input input, Class<? extends AbstractUserAgentAnalyzerDirect> type) {
+            return (AbstractUserAgentClientHintsAnalyzer) super.read(kryo, input, type);
         }
+    }
+
+    protected int clientHintCacheSize = DEFAULT_PARSE_CACHE_SIZE;
+
+    @Override
+    public void disableCaching() {
+        super.disableCaching();
+        setClientHintsCacheSize(0);
+    }
+
+    /**
+     * Sets the new size of the parsing cache for the Client Hints.
+     * Note that this will also wipe the existing cache.
+     *
+     * @param newHintCacheSize The size of the new LRU cache. As size of 0 will disable caching.
+     */
+    public void setClientHintsCacheSize(int newHintCacheSize) {
+        clientHintCacheSize = Math.max(newHintCacheSize, 0);
+        if (wasBuilt) {
+            initializeCache();
+        }
+    }
+
+    public int getClientHintCacheSize() {
+        return clientHintCacheSize;
+    }
+
+    @Override
+    public void clearCache() {
+        super.clearCache();
+        clientHintParser.clearCache();
+    }
+
+    public void setClientHintCacheInstantiator(ClientHintCacheInstantiator<?> newClientHintCacheInstantiator) {
+        clientHintParser.setHintCacheInstantiator(newClientHintCacheInstantiator);
+        if (wasBuilt) {
+            clientHintParser.initializeCache();
+        }
+    }
+
+    @Override
+    synchronized void initializeCache() {
+        super.initializeCache();
+        clientHintParser.initializeCache();
     }
 
     /**
@@ -169,7 +213,7 @@ public class AbstractClientHintAnalyzer extends AbstractUserAgentAnalyzer implem
     }
 
     private ImmutableUserAgent merge(ImmutableUserAgent originalUserAgent, ClientHints clientHints) {
-        // FIXME: First version: Very hard coded analysis. Sorry about that.
+        // FIXME: First version: Very hard coded analysis rules.
 
         MutableUserAgent userAgent = new MutableUserAgent(originalUserAgent);
 
@@ -327,11 +371,47 @@ public class AbstractClientHintAnalyzer extends AbstractUserAgentAnalyzer implem
     }
 
     @SuppressWarnings("unchecked") // For all the casts of 'this' to 'B'
-    public abstract static class AbstractUserAgentWithClientHintAnalyzerBuilder<UAA extends AbstractClientHintAnalyzer, B extends AbstractUserAgentWithClientHintAnalyzerBuilder<UAA, B>>
+    public abstract static class AbstractUserAgentClientHintsAnalyzerBuilder<UAA extends AbstractUserAgentClientHintsAnalyzer, B extends AbstractUserAgentClientHintsAnalyzerBuilder<UAA, B>>
         extends AbstractUserAgentAnalyzerBuilder<UAA, B> {
 
-        protected AbstractUserAgentWithClientHintAnalyzerBuilder(UAA newUaa) {
+        private final UAA uaa;
+
+        protected AbstractUserAgentClientHintsAnalyzerBuilder(UAA newUaa) {
             super(newUaa);
+            this.uaa = newUaa;
+        }
+
+        /**
+         * Specify a new ClientHint cache size (0 = disable caching).
+         * @param newCacheSize The new cache size value
+         * @return the current Builder instance.
+         */
+        public B withClientHintsCache(int newCacheSize) {
+            failIfAlreadyBuilt();
+            uaa.setClientHintsCacheSize(newCacheSize);
+            return (B)this;
+        }
+
+        /**
+         * Disable ClientHint caching.
+         * @return the current Builder instance.
+         */
+        public B withoutClientHintsCache() {
+            failIfAlreadyBuilt();
+            uaa.setClientHintsCacheSize(0);
+            return (B)this;
+        }
+
+        /**
+         * Specify a custom class to create the ClientHint  cache.
+         * Use this if the default Caffeine cache is unsuitable for your needs.
+         * @param cacheInstantiator The class that will create a new cache instance when requested.
+         * @return the current Builder instance.
+         */
+        public B withClientHintCacheInstantiator(ClientHintCacheInstantiator<?> cacheInstantiator) {
+            failIfAlreadyBuilt();
+            uaa.setClientHintCacheInstantiator(cacheInstantiator);
+            return (B)this;
         }
 
         @SuppressWarnings("EmptyMethod") // We must override the method because of the generic return value.

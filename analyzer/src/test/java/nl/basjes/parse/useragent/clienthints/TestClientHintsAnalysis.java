@@ -17,7 +17,7 @@
 
 package nl.basjes.parse.useragent.clienthints;
 
-import nl.basjes.parse.useragent.UserAgentWithClientHintAnalyzer;
+import nl.basjes.parse.useragent.UserAgentClientHintsAnalyzer;
 import nl.basjes.parse.useragent.UserAgent.ImmutableUserAgent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,19 +38,18 @@ class TestClientHintsAnalysis {
 
     // ------------------------------------------
 
-    static UserAgentWithClientHintAnalyzer analyzer;
+    static UserAgentClientHintsAnalyzer analyzer;
 
     @BeforeAll
     static void beforeAll() {
-        analyzer = UserAgentWithClientHintAnalyzer.newBuilder().build();
+        analyzer = UserAgentClientHintsAnalyzer.newBuilder().build();
     }
 
-    private void checkExpectations(ImmutableUserAgent userAgent, Map<String, String> expectations){
+    public void checkExpectations(ImmutableUserAgent userAgent, Map<String, String> expectations){
         for (Map.Entry<String, String> expectation : expectations.entrySet()) {
             assertEquals(expectation.getValue(), userAgent.getValue(expectation.getKey()));
         }
     }
-
 
     @Test
     void testChromeWindows11() {

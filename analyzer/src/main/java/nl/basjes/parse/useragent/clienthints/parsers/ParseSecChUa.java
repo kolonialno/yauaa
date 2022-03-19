@@ -17,8 +17,9 @@
 
 package nl.basjes.parse.useragent.clienthints.parsers;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
+import nl.basjes.parse.useragent.clienthints.ClientHintParser.ClientHintCacheInstantiator;
 import nl.basjes.parse.useragent.clienthints.ClientHints;
+import nl.basjes.parse.useragent.clienthints.ClientHints.BrandVersion;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -29,10 +30,21 @@ public class ParseSecChUa implements CHParser {
 
     public static final String HEADER_FIELD = "Sec-CH-UA";
 
-    private transient ConcurrentMap<String, List<ClientHints.BrandVersion>> cache;
+    private transient ConcurrentMap<String, List<BrandVersion>> cache = null;
 
     public ParseSecChUa() {
-        cache = Caffeine.newBuilder().maximumSize(10000).<String, List<ClientHints.BrandVersion>>build().asMap();
+        // Nothing to do right now
+    }
+
+    @SuppressWarnings("unchecked")
+    public void initializeCache(ClientHintCacheInstantiator<?> clientHintCacheInstantiator, int cacheSize) {
+        cache = (ConcurrentMap<String, List<BrandVersion>>) clientHintCacheInstantiator.instantiateCache(cacheSize);
+    }
+
+    public void clearCache() {
+        if (cache != null) {
+            cache.clear();
+        }
     }
 
     //   From https://wicg.github.io/ua-client-hints/#http-ua-hints
@@ -64,7 +76,7 @@ public class ParseSecChUa implements CHParser {
             return clientHints;
         }
         // " Not A;Brand";v="99", "Chromium";v="99", "Google Chrome";v="99"
-        List<ClientHints.BrandVersion> brandVersions = cache.computeIfAbsent(input, value -> BrandVersionListParser.parse(input));
+        List<BrandVersion> brandVersions = cache.computeIfAbsent(input, value -> BrandVersionListParser.parse(input));
         if (!brandVersions.isEmpty()) {
             clientHints.setBrands(brandVersions);
         }

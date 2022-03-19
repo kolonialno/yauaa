@@ -25,7 +25,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import nl.basjes.parse.useragent.UserAgent;
-import nl.basjes.parse.useragent.UserAgentAnalyzer;
+import nl.basjes.parse.useragent.UserAgentClientHintsAnalyzer;
 import nl.basjes.parse.useragent.servlet.ParseService;
 import nl.basjes.parse.useragent.servlet.exceptions.MissingUserAgentException;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -192,7 +192,7 @@ public class ApiJsonOutput {
         }
         ensureStartedForApis(OutputType.JSON);
         if (userAgentAnalyzerIsAvailable()) {
-            UserAgentAnalyzer userAgentAnalyzer = ParseService.getUserAgentAnalyzer();
+            UserAgentClientHintsAnalyzer userAgentAnalyzer = ParseService.getAnalyzer();
             List<String> result = new ArrayList<>(2048);
             for (String input : splitPerFilledLine(userAgentString)) {
                 UserAgent userAgent = userAgentAnalyzer.parse(input);
