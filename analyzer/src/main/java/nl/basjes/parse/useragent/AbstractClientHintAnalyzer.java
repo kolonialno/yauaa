@@ -56,7 +56,7 @@ import static nl.basjes.parse.useragent.classify.DeviceClass.TABLET;
 import static nl.basjes.parse.useragent.clienthints.Constants.USERAGENT_HEADER;
 
 @DefaultSerializer(AbstractClientHintAnalyzer.KryoSerializer.class)
-public class AbstractClientHintAnalyzer extends AbstractUserAgentAnalyzerDirect implements Serializable {
+public class AbstractClientHintAnalyzer extends AbstractUserAgentAnalyzer implements Serializable {
 
     private ClientHintParser clientHintParser;
 
@@ -210,7 +210,7 @@ public class AbstractClientHintAnalyzer extends AbstractUserAgentAnalyzerDirect 
         // - "Unknown"
         String platform = clientHints.getPlatform();
         String platformVersion = clientHints.getPlatformVersion();
-        if (platform != null && platformVersion != null) {
+        if (platform != null && platformVersion != null && !platform.trim().isEmpty() && !platformVersion.trim().isEmpty()) {
 //            MutableAgentField osName    = (MutableAgentField) userAgent.get(UserAgent.OPERATING_SYSTEM_NAME);
             String majorVersion = VersionSplitter.getInstance().getSingleSplit(platformVersion, 1);
             switch (platform) {
@@ -248,13 +248,11 @@ public class AbstractClientHintAnalyzer extends AbstractUserAgentAnalyzerDirect 
 
                 case "Unknown":
                 default:
-                    if (platformVersion != null && !platformVersion.trim().isEmpty()) {
-                        platform = userAgent.getValue(UserAgent.OPERATING_SYSTEM_NAME);
-                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION), platformVersion);
-                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION_MAJOR), majorVersion);
-                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION), platform + " " + platformVersion);
-                        overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION_MAJOR), platform + " " + majorVersion);
-                    }
+                    platform = userAgent.getValue(UserAgent.OPERATING_SYSTEM_NAME);
+                    overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION), platformVersion);
+                    overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_VERSION_MAJOR), majorVersion);
+                    overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION), platform + " " + platformVersion);
+                    overrideValue(userAgent.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION_MAJOR), platform + " " + majorVersion);
                     break;
             }
         }
@@ -329,10 +327,10 @@ public class AbstractClientHintAnalyzer extends AbstractUserAgentAnalyzerDirect 
     }
 
     @SuppressWarnings("unchecked") // For all the casts of 'this' to 'B'
-    public abstract static class AbstractClientHintAnalyzerDirectBuilder<UAA extends AbstractClientHintAnalyzer, B extends AbstractClientHintAnalyzerDirectBuilder<UAA, B>>
-        extends AbstractUserAgentAnalyzerDirectBuilder<UAA, B> {
+    public abstract static class AbstractUserAgentWithClientHintAnalyzerBuilder<UAA extends AbstractClientHintAnalyzer, B extends AbstractUserAgentWithClientHintAnalyzerBuilder<UAA, B>>
+        extends AbstractUserAgentAnalyzerBuilder<UAA, B> {
 
-        protected AbstractClientHintAnalyzerDirectBuilder(UAA newUaa) {
+        protected AbstractUserAgentWithClientHintAnalyzerBuilder(UAA newUaa) {
             super(newUaa);
         }
 

@@ -30,7 +30,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 @DefaultSerializer(AbstractUserAgentAnalyzer.KryoSerializer.class)
-public class AbstractUserAgentAnalyzer extends AbstractClientHintAnalyzer implements Serializable {
+public class AbstractUserAgentAnalyzer extends AbstractUserAgentAnalyzerDirect implements Serializable {
     public static final int DEFAULT_PARSE_CACHE_SIZE = 10000;
 
     protected int cacheSize = DEFAULT_PARSE_CACHE_SIZE;
@@ -177,7 +177,7 @@ public class AbstractUserAgentAnalyzer extends AbstractClientHintAnalyzer implem
 
     @SuppressWarnings("unchecked") // For all the casts of 'this' to 'B'
     public abstract  static class AbstractUserAgentAnalyzerBuilder<UAA extends AbstractUserAgentAnalyzer, B extends AbstractUserAgentAnalyzerBuilder<UAA, B>>
-            extends AbstractClientHintAnalyzerDirectBuilder<UAA, B> {
+            extends AbstractUserAgentAnalyzerDirectBuilder<UAA, B> {
         private final UAA uaa;
 
         protected AbstractUserAgentAnalyzerBuilder(UAA newUaa) {

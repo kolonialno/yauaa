@@ -17,8 +17,8 @@
 
 package nl.basjes.parse.useragent.clienthints;
 
+import nl.basjes.parse.useragent.UserAgentWithClientHintAnalyzer;
 import nl.basjes.parse.useragent.UserAgent.ImmutableUserAgent;
-import nl.basjes.parse.useragent.UserAgentAnalyzer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
@@ -38,11 +38,11 @@ class TestClientHintsAnalysis {
 
     // ------------------------------------------
 
-    static UserAgentAnalyzer analyzer;
+    static UserAgentWithClientHintAnalyzer analyzer;
 
     @BeforeAll
     static void beforeAll() {
-        analyzer = UserAgentAnalyzer.newBuilder().build();
+        analyzer = UserAgentWithClientHintAnalyzer.newBuilder().build();
     }
 
     private void checkExpectations(ImmutableUserAgent userAgent, Map<String, String> expectations){
