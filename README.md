@@ -1,3 +1,25 @@
+# Oda YAUAA 
+
+This repository has been forked in order to facilitate running YAUAA from a Snowflake UDF. This is required to generate a YAUAA context for Snowplow events from the fivetran collector.
+
+Changes to the code are necessary as:-
+
+- The current Snowplow enricher uses v5.23 of YAUAA; however the Snowplow UDF functionality is available from v6.2.
+- YAUAA outputs data in camelcase with a capitalized first letter, the Snowplow enricher sets this the first letter lowercase.
+
+Note due to the dependency on running a Linux system to install the dev tools, the development guidelines are not applicable. Instead dependencies (including YAUAA) have been pinned in the Snowflake UDF sub-project's POM.xml
+
+To compile the JAR :-
+
+`mvn install -f /src/pom.xml`  
+`mvn package -f /udfs/snowflake/pom.xml`
+
+
+
+
+
+
+
 Yauaa: Yet Another UserAgent Analyzer
 ========================================
 [![Travis Build status](https://api.travis-ci.org/nielsbasjes/yauaa.png?branch=master)](https://travis-ci.org/nielsbasjes/yauaa)
