@@ -18,23 +18,33 @@
 package nl.basjes.parse.useragent.snowflake;
 
 import nl.basjes.parse.useragent.UserAgentAnalyzer;
-import org.apache.commons.text.CaseUtils;
 
 import java.util.Map;
 import java.util.HashMap;
 
+
+
 // CHECKSTYLE.OFF: HideUtilityClassConstructor because this is how Snowflake wants it.
 public class ParseUserAgent {
 
-    private static final UserAgentAnalyzer ANALYZER = UserAgentAnalyzer.newBuilder().dropTests().immediateInitialization().build();
+    static String toCamelCase(String str){
+        char[] chArr = str.toCharArray();
+        chArr[0] = Character.toLowerCase(chArr[0]);
+        return new String(chArr);
+    }
+
+    private static final UserAgentAnalyzer ANALYZER =
+        UserAgentAnalyzer.newBuilder().dropTests().immediateInitialization().build();
 
     public static Map<String, String> parse(String useragent) {
         return ANALYZER.parse(useragent)
             .toMap()
             .entrySet()
             .stream()
-            .collect(HashMap::new,
-                     (m, e) -> m.put(CaseUtils.toCamelCase(e.getKey(), false), e.getValue()),
-                     HashMap::putAll);
+            .collect(
+                     HashMap::new,
+                     (m, e) -> m.put(toCamelCase(e.getKey()), e.getValue()),
+                     HashMap::putAll
+            );
     }
 }
