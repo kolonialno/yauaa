@@ -11,7 +11,7 @@ Note due to the dependency on running a Linux system to install the dev tools, t
 
 To compile the JAR :-
 
-`mvn install -f /src/pom.xml`
+`mvn install -f /src/pom.xml`  
 `mvn package -f /udfs/snowflake/pom.xml`
 
 
