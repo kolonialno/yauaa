@@ -21,7 +21,7 @@
 
   <name>Yauaa : UDF : Snowflake</name>
   <description>A parsing and analyzing library to get information from a useragent string.</description>
-  <groupId>nl.basjes.parse.useragent.udf</groupId>
+  <groupId>nl.basjes.parse.useragent</groupId>
   <artifactId>yauaa-snowflake</artifactId>
   <version>5.23</version>
 
@@ -89,6 +89,12 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-text</artifactId>
+      <version>1.9</version>
     </dependency>
 
 
